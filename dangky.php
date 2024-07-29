@@ -1,132 +1,153 @@
-<?php 
-    require_once "inc/header.php";
+<?php
+require_once "inc/header.php";
 ?>
 <!-- =============================================================================================== -->
-<?php 
-    require_once "class/KhachHang.php";
+<?php
+require_once "class/KhachHang.php";
 
-    // Khởi tạo các biến lỗi và dữ liệu người dùng
-    $hotenError = '';
-    $gioitinhError = '';
-    $emailError = '';
-    $passError = '';
-    $passcfError = '';
-    $ngaysinhError = '';
-    $sdtError = '';
-    $diachiError = '';
-    $thanhphoError = '';
-    $quanError = '';
-    $phuongError = '';
-    $duongError = '';
+$vietnamProvinces = [
+    'An Giang', 'Bạc Liêu', 'Bắc Cạn', 'Bắc Giang', 'Bắc Ninh', 'Bình Dương', 
+    'Bình Phước', 'Bình Thuận', 'Bình Định', 'Cà Mau', 'Cần Thơ', 'Cao Bằng', 
+    'Đà Nẵng', 'Đắk Lắk', 'Đắk Nông', 'Đồng Nai', 'Đồng Tháp', 'Gia Lai', 
+    'Hà Giang', 'Hà Nội', 'Hà Nam', 'Hà Tĩnh', 'Hải Dương', 'Hải Phòng', 
+    'Hậu Giang', 'Hòa Bình', 'Hồ Chí Minh', 'Hưng Yên', 'Khánh Hòa', 
+    'Kiên Giang', 'Kon Tum', 'Lai Châu', 'Lâm Đồng', 'Lạng Sơn', 'Long An', 
+    'Nam Định', 'Nghệ An', 'Ninh Bình', 'Ninh Thuận', 'Phú Thọ', 'Phú Yên', 
+    'Quảng Bình', 'Quảng Nam', 'Quảng Ngãi', 'Quảng Ninh', 'Quảng Trị', 
+    'Sóc Trăng', 'Sơn La', 'Tây Ninh', 'Thái Bình', 'Thái Nguyên', 
+    'Thừa Thiên Huế', 'Tiền Giang', 'Trà Vinh', 'Vĩnh Long', 'Vĩnh Phúc', 
+    'Yên Bái'
+];
 
-    $hoten = '';
-    $gioitinh = '';
-    $email = '';
-    $pass = '';
-    $passcf = '';
-    $ngaysinh = '';
-    $sdt = '';
-    $diachi = '';
-    $thanhpho = '';
-    $quan = '';
-    $phuong = '';
-    $duong = '';
 
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $hoten = $_POST['hoten'];
-        $gioitinh = $_POST['gioitinh'];
-        $email = $_POST['email'];
-        $pass = $_POST['pass'];
-        $passcf = $_POST['passcf'];
-        $ngaysinh = $_POST['ngaysinh'];
-        $sdt = $_POST['sdt'];
-        $diachi = $_POST['diachi'];
-        $thanhpho = $_POST['thanhpho'];
-        $quan = $_POST['quan'];
-        $phuong = $_POST['phuong'];
-        $duong = $_POST['duong'];
+// Khởi tạo các biến lỗi và dữ liệu người dùng
+$hotenError = '';
+$gioitinhError = '';
+$emailError = '';
+$passError = '';
+$passcfError = '';
+$ngaysinhError = '';
+$sdtError = '';
+$diachiError = '';
+$thanhphoError = '';
+$quanError = '';
+$phuongError = '';
+$duongError = '';
 
-        // Kiểm tra họ tên
-        if (empty($hoten)) {
-            $hotenError = 'Hãy nhập họ tên';
-        }
+$hoten = '';
+$gioitinh = '';
+$email = '';
+$pass = '';
+$passcf = '';
+$ngaysinh = '';
+$sdt = '';
+$diachi = '';
+$thanhpho = '';
+$quan = '';
+$phuong = '';
+$duong = '';
 
-        // Kiểm tra giới tính
-        if (empty($gioitinh)) {
-            $gioitinhError = 'Hãy chọn giới tính';
-        }
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $hoten = $_POST['hoten'];
+    $gioitinh = $_POST['gioitinh'];
+    $email = $_POST['email'];
+    $pass = $_POST['pass'];
+    $passcf = $_POST['passcf'];
+    $ngaysinh = $_POST['ngaysinh'];
+    $sdt = $_POST['sdt'];
+    $diachi = $_POST['diachi'];
+    $thanhpho = $_POST['thanhpho'];
+    $quan = $_POST['quan'];
+    $phuong = $_POST['phuong'];
+    $duong = $_POST['duong'];
 
-        // Kiểm tra email
-        if (empty($email)) {
-            $emailError = 'Hãy nhập email';
-        } elseif (!preg_match("/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/", $email)) {
-            $emailError = 'Email không hợp lệ';
-        } elseif (KhachHang::isEmailExists($pdo, $email)) {
-            $emailError = 'Email đã tồn tại';
-        }
-
-        // Kiểm tra mật khẩu
-        if (empty($pass)) {
-            $passError = 'Hãy nhập mật khẩu';
-        } elseif (!preg_match("/^.{8,}$/", $pass)) {
-            $passError = "Mật khẩu phải có ít nhất 8 ký tự";
-        }
-
-        // Kiểm tra xác nhận mật khẩu
-        if (empty($passcf)) {
-            $passcfError = 'Hãy nhập lại mật khẩu';
-        } elseif ($pass != $passcf) {
-            $passcfError = "Mật khẩu nhập lại không khớp";
-        }
-
-        // Kiểm tra ngày sinh
-        if (empty($ngaysinh)) {
-            $ngaysinhError = 'Hãy nhập ngày sinh';
-        }
-
-        // Kiểm tra số điện thoại
-        if (empty($sdt)) {
-            $sdtError = 'Hãy nhập số điện thoại';
-        } elseif (!preg_match("/^\d{10}$/", $sdt)) {
-            $sdtError = 'Số điện thoại không hợp lệ';
-        }
-
-        // Kiểm tra địa chỉ
-        if (empty($diachi)) {
-            $diachiError = 'Hãy nhập địa chỉ cụ thể';
-        }
-        if (empty($thanhpho)) {
-            $thanhphoError = 'Hãy nhập thành phố';
-        }
-        if (empty($quan)) {
-            $quanError = 'Hãy nhập quận';
-        }
-        if (empty($phuong)) {
-            $phuongError = 'Hãy nhập phường';
-        }
-        if (empty($duong)) {
-            $duongError = 'Hãy nhập đường';
-        }
-
-        // Nếu không có lỗi nào, thêm khách hàng mới vào MongoDB
-        if (empty($hotenError) && empty($gioitinhError) && empty($emailError) && empty($passError) && empty($passcfError) && empty($ngaysinhError) && empty($sdtError) && empty($diachiError) && empty($thanhphoError) && empty($quanError) && empty($phuongError) && empty($duongError)) {
-            $hashed_pass = password_hash($pass, PASSWORD_DEFAULT);
-            
-            // Thêm khách hàng mới vào MongoDB
-            KhachHang::addKhachHang($pdo, $hoten, $gioitinh, $ngaysinh, [
-                'diachi' => $diachi,
-                'thanhpho' => $thanhpho,
-                'quan' => $quan,
-                'phuong' => $phuong,
-                'duong' => $duong
-            ], $sdt, $email, $hashed_pass);
-
-            header("Location: dangnhap.php");
-            exit;
-        }
+    // Kiểm tra họ tên
+    if (empty($hoten)) {
+        $hotenError = 'Hãy nhập họ tên';
     }
+
+    // Kiểm tra giới tính
+    if (empty($gioitinh)) {
+        $gioitinhError = 'Hãy chọn giới tính';
+    }
+
+    // Kiểm tra email
+    if (empty($email)) {
+        $emailError = 'Hãy nhập email';
+    } elseif (!preg_match("/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/", $email)) {
+        $emailError = 'Email không hợp lệ';
+    } elseif (KhachHang::isEmailExists($pdo, $email)) {
+        $emailError = 'Email đã tồn tại';
+    }
+
+    // Kiểm tra mật khẩu
+    if (empty($pass)) {
+        $passError = 'Hãy nhập mật khẩu';
+    } elseif (!preg_match("/^.{8,}$/", $pass)) {
+        $passError = "Mật khẩu phải có ít nhất 8 ký tự";
+    }
+
+    // Kiểm tra xác nhận mật khẩu
+    if (empty($passcf)) {
+        $passcfError = 'Hãy nhập lại mật khẩu';
+    } elseif ($pass != $passcf) {
+        $passcfError = "Mật khẩu nhập lại không khớp";
+    }
+
+    // Kiểm tra ngày sinh
+    if (empty($ngaysinh)) {
+        $ngaysinhError = 'Hãy nhập ngày sinh';
+    }
+
+    // Kiểm tra số điện thoại
+    if (empty($sdt)) {
+        $sdtError = 'Hãy nhập số điện thoại';
+    } elseif (!preg_match("/^\d{10}$/", $sdt)) {
+        $sdtError = 'Số điện thoại không hợp lệ';
+    }
+
+    // Kiểm tra địa chỉ
+    if (empty($diachi)) {
+        $diachiError = 'Hãy nhập địa chỉ cụ thể';
+    }
+    if (empty($thanhpho)) {
+        $thanhphoError = 'Hãy chọn tỉnh';
+    }
+    if (empty($quan)) {
+        $quanError = 'Hãy nhập quận/ huyện';
+    }
+    if (empty($phuong)) {
+        $phuongError = 'Hãy nhập xã/ phường';
+    }
+    if (empty($duong)) {
+        $duongError = 'Hãy nhập đường';
+    }
+
+    // Nếu không có lỗi nào, thêm khách hàng mới vào MongoDB
+    if (empty($hotenError) && empty($gioitinhError) && empty($emailError) && empty($passError) && empty($passcfError) && empty($ngaysinhError) && empty($sdtError) && empty($diachiError) && empty($thanhphoError) && empty($quanError) && empty($phuongError) && empty($duongError)) {
+        $hashed_pass = password_hash($pass, PASSWORD_DEFAULT);
+
+        // Thêm khách hàng mới vào MongoDB
+        KhachHang::addKhachHang($pdo, $hoten, $gioitinh, $ngaysinh, [
+            'diachi' => $diachi,
+            'thanhpho' => $thanhpho,
+            'quan' => $quan,
+            'phuong' => $phuong,
+            'duong' => $duong
+        ], $sdt, $email, $hashed_pass);
+
+        header("Location: dangnhap.php");
+        exit;
+    }
+}
 ?>
 
+<style>
+.contact-form-area .contact-form-wrapper form.contact-form .nice-select.open .list {
+    max-height: 200px;
+    overflow-y: auto; 
+}
+</style>
 
 <main>
     <!--? contact-form start -->
@@ -150,99 +171,107 @@
                             <div class="row ">
                                 <div class="col-lg-12">
                                     <div class="input-form">
-                                        <span class="text-danger"><?= $hotenError ?></span>
+                                        <label class="form-label my-1" style="font-size: 16px;">Họ tên:</label>
                                         <input type="text" id="hoten" name="hoten" value="<?= $hoten ?>" placeholder="Họ và tên">
-                                        
+                                        <span class="text-danger"><?= $hotenError ?></span>
                                     </div>
                                 </div>
                                 <div class="col-lg-12">
                                     <div class="input-form">
-                                        <span class="text-danger"><?= $diachiError ?></span>
+                                        <label class="form-label my-1" style="font-size: 16px;">Địa chỉ:</label>
                                         <input type="text" id="diachi" name="diachi" value="<?= $diachi ?>" placeholder="Địa chỉ">
-                                        
+                                        <span class="text-danger"><?= $diachiError ?></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6 col-md-6">
+                                    <div class="select-items">
+                                        <label class="form-label my-1" style="font-size: 16px; display: block;">Tỉnh:</label>
+                                        <select id="thanhpho" name="thanhpho" size="5" >
+                                            <option value="" selected>Chọn tỉnh</option>
+                                            <?php foreach ($vietnamProvinces as $province) : ?>
+                                                <option value="<?= $province ?>" <?= $province === $thanhpho ? 'selected' : '' ?>><?= $province ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <span class="text-danger"><?= $thanhphoError ?></span>
                                     </div>
                                 </div>
 
                                 <div class="col-lg-6 col-md-6">
                                     <div class="input-form">
-                                        <span class="text-danger"><?= $thanhphoError ?></span>
-                                        <input type="text" id="thanhpho" name="thanhpho" value="<?= $thanhpho ?>" placeholder="Thành phố">
-                                        
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 col-md-6">
-                                    <div class="input-form">
-                                        <span class="text-danger"><?= $quanError ?></span>
+                                        <label class="form-label my-1" style="font-size: 16px;">Quận/ Huyện:</label>
                                         <input type="text" id="quan" name="quan" value="<?= $quan ?>" placeholder="Quận">
-                                        
+                                        <span class="text-danger"><?= $quanError ?></span>
                                     </div>
                                 </div>
                                 <div class="col-lg-6 col-md-6">
                                     <div class="input-form">
-                                        <span class="text-danger"><?= $phuongError ?></span>
+                                        <label class="form-label my-1" style="font-size: 16px;">Xã/ Phường:</label>
                                         <input type="text" id="phuong" name="phuong" value="<?= $phuong ?>" placeholder="Phường">
-                                        
+                                        <span class="text-danger"><?= $phuongError ?></span>
                                     </div>
                                 </div>
                                 <div class="col-lg-6 col-md-6">
                                     <div class="input-form">
-                                        <span class="text-danger"><?= $duongError ?></span>
+                                        <label class="form-label my-1" style="font-size: 16px;">Đường:</label>
                                         <input type="text" id="duong" name="duong" value="<?= $duong ?>" placeholder="Đường">
-                                        
+                                        <span class="text-danger"><?= $duongError ?></span>
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-lg-6 col-md-6">
                                     <div class="select-items">
-                                        <span class="text-danger"><?= $gioitinhError ?></span>
+                                        <label class="form-label my-1" style="font-size: 16px; display: block;">Giới tính:</label>
                                         <select name="gioitinh" id="gioitinh">
                                             <option value="">Giới Tính</option>
                                             <option value="Nam">Nam</option>
                                             <option value="Nữ">Nữ</option>
                                         </select>
-                                        
+                                        <span class="text-danger"><?= $gioitinhError ?></span>
                                     </div>
                                 </div>
                                 <div class="col-lg-6 col-md-6">
                                     <div class="input-form">
-                                        <span class="text-danger"><?= $ngaysinhError ?></span>
+                                        <label class="form-label my-1" style="font-size: 16px;">Ngày Sinh:</label>                                      
                                         <input type="date" id="ngaysinh" name="ngaysinh" value="<?= $ngaysinh ?>" placeholder="Ngày sinh">
-                                        
+                                        <span class="text-danger"><?= $ngaysinhError ?></span>
                                     </div>
                                 </div>
                                 <div class="col-lg-12">
                                     <div class="input-form">
-                                        <span class="text-danger"><?= $sdtError ?></span>
+                                        <label class="form-label my-1" style="font-size: 16px;">Số điện thoại:</label>
                                         <input type="text" id="sdt" name="sdt" value="<?= $sdt ?>" placeholder="Số điện thoại">
-                                        
+                                        <span class="text-danger"><?= $sdtError ?></span>
                                     </div>
                                 </div>
                                 <div class="col-lg-12">
                                     <div class="input-form">
-                                        <span class="text-danger"><?= $emailError ?></span>
+                                        <label class="form-label my-1" style="font-size: 16px;">Email:</label>
                                         <input type="text" id="email" name="email" value="<?= $email ?>" placeholder="Email">
-                                        
+                                        <span class="text-danger"><?= $emailError ?></span>
                                     </div>
                                 </div>
                                 <div class="col-lg-12">
                                     <div class="input-form">
-                                        <span class="text-danger"><?= $passError ?></span>
+                                        <label class="form-label my-1" style="font-size: 16px;">Mật khẩu:</label>
                                         <input type="password" id="pass" name="pass" value="<?= $pass ?>" placeholder="Mật khẩu">
+                                        <span class="text-danger"><?= $passError ?></span>
                                     </div>
                                 </div>
                                 <div class="col-lg-12">
                                     <div class="input-form">
-                                        <span class="text-danger"><?= $passcfError ?></span>
+                                        <label class="form-label my-1" style="font-size: 16px;">Nhập lại mật khẩu:</label>
                                         <input type="password" id="passcf" name="passcf" value="<?= $passcf ?>" placeholder="Nhập lại mật khẩu">
+                                        <span class="text-danger"><?= $passcfError ?></span>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Button -->
                                 <div class="col-lg-12">
                                     <button name="submit" class="submit-btn">Đăng ký</button>
                                 </div>
                             </div>
-                        </form>	
+                        </form>
                     </div>
                 </div>
             </div>
@@ -252,6 +281,6 @@
 </main>
 
 <!-- =============================================================================================== -->
-<?php 
-    require_once "inc/footer.php";
+<?php
+require_once "inc/footer.php";
 ?>

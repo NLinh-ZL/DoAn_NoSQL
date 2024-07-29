@@ -102,5 +102,14 @@ class KhachHang {
         header("location: index.php"); 
         exit;
     }
+    
+    public static function getUserById($pdo, $idKH) {
+        $collection = $pdo->KhachHang;
+    
+        // Tìm tài liệu người dùng với idKH
+        $kh = $collection->findOne(['idKH' => $idKH]);
+    
+        return $kh ?: null;
+    }
 }
 ?>

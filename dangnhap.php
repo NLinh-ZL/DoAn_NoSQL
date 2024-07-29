@@ -34,10 +34,10 @@ require_once "class/KhachHang.php";
             $loginResult = KhachHang::isValid($pdo, $email, $pass);
             if ($loginResult === true) {
                 $us = KhachHang::getUser($pdo, $email, $pass);
-                $_SESSION['logged_us'] = $us;
-                $_SESSION['logged_role'] = $us['role'];
-                $_SESSION['logged_name'] = $us['hoTen'];
-
+                $_SESSION['logged_us'] = serialize($us);
+                $_SESSION['logged_role'] = $us->role;
+                $_SESSION['logged_name'] = $us->hoTen;
+                $_SESSION['logged_id'] = $us->idKH;
                 // if ($_SESSION['logged_role'] == "1") {
                 //     header("Location: admin.php");
                 //     exit;
