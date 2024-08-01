@@ -5,6 +5,7 @@ require_once "inc/header.php";
 <?php
 require_once "class/KhachHang.php";
 require_once "class/VanDon.php";
+require_once "class/API.php";
 
 $vietnamProvinces = [
     'An Giang', 'Bạc Liêu', 'Bắc Cạn', 'Bắc Giang', 'Bắc Ninh', 'Bình Dương',
@@ -47,8 +48,8 @@ $duongGui = $diaChiGui['duong'];
 
 
 $tienThuHo = 0;
-$hoTenNguoiNhan=$thoiGianHenLay = $sdtNguoiNhan = $diaChiNguoiNhan = '';
-$thanhPho = $quan = $phuong = $duong = '';
+$hoTenNguoiNhan = $thoiGianHenLay = $sdtNguoiNhan = $diaChiNguoiNhan = '';
+$sonha = $thanhPho = $quan = $phuong = $duong = '';
 $thoiGianHenGiao = $loaiHangHoa = $tienThuHo = $ghiChu = '';
 $nguoiTraCuoc = $loaiVanChuyen = '';
 $tinhChatHangHoaDacBiet = [];
@@ -56,10 +57,10 @@ $items = [];
 
 
 $thoiGianHenLayError = $sdtNguoiNhanError = $diaChiNguoiNhanError = '';
-$thanhPhoError = $quanError = $phuongError = $duongError = '';
+$sonhaError = $thanhPhoError = $quanError = $phuongError = $duongError = '';
 $thoiGianHenGiaoError = $loaiHangHoaError = '';
 $nguoiTraCuocError = $loaiVanChuyenError = '';
-$hoTenNguoiNhanError=$tinhChatHangHoaDacBietError = '';
+$hoTenNguoiNhanError = $tinhChatHangHoaDacBietError = '';
 $itemError = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -72,6 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $quan = $_POST['quan'];
     $phuong = $_POST['phuong'];
     $duong = $_POST['duong'];
+    $sonha = $_POST['sonha'];
     $thoiGianHenGiao = $_POST['tghengiao'];
     $loaiHangHoa = isset($_POST['loaiHangHoa']) ? $_POST['loaiHangHoa'] : '';
     $tienThuHo = $_POST['thuho'];
@@ -93,16 +95,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $tenhang = $_POST["tenhang$i"];
         $soluong = $_POST["soluong$i"];
         $trongluong = $_POST["trongluong$i"];
-        $giatien = $_POST["giatien$i"];
+        $giatien = isset($_POST["giatien$i"]) ? $_POST["giatien$i"] : 0;
 
-        if (empty($tenhang) || empty($soluong) || empty($trongluong) || empty($giatien)) {
+        if (empty($tenhang) || empty($soluong) || empty($trongluong)) {
             $itemError = "Nhập thiếu dữ liệu về hàng hóa";
         } else {
             $tongTrongLuong += $trongluong;
         }
 
         // Chỉ thêm vào mảng $items nếu không có lỗi
-        if (!empty($tenhang) && !empty($soluong) && !empty($trongluong) && !empty($giatien)) {
+        if (!empty($tenhang) && !empty($soluong) && !empty($trongluong)) {
             $items[] = [
                 'tenHang' => $tenhang,
                 'soLuong' => $soluong,
@@ -111,6 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             ];
         }
     }
+
 
 
     // Kiểm tra các trường dữ liệu
@@ -130,6 +133,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if (empty($diaChiNguoiNhan)) {
         $diaChiNguoiNhanError = "Địa chỉ người nhận không được để trống";
+    } else {
+        //API googlemap
+        $switchLocation = geocodeAddress($diaChiNguoiNhan, $googleApiKey);
+        if ($switchLocation === false) {
+            $diaChiNguoiNhanError = "Địa chỉ người nhận bạn nhập không tồn tại";
+        }
     }
 
     if (empty($thanhPho)) {
@@ -146,6 +155,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if (empty($duong)) {
         $duongError = "Đường không được để trống";
+    }
+
+    if (empty($sonha)) {
+        $sonhaError = "Số nhà không được để trống";
     }
 
     if (empty($thoiGianHenGiao)) {
@@ -165,45 +178,87 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // Kiểm tra đặc tính hàng hóa đặc biệt
-    if (empty($tinhChatHangHoaDacBiet)) {
-        $tinhChatHangHoaDacBietError = "Phải chọn ít nhất một tính chất hàng hóa.";
-    }
+    // if (empty($tinhChatHangHoaDacBiet)) {
+    //     $tinhChatHangHoaDacBietError = "Phải chọn ít nhất một tính chất hàng hóa.";
+    // }
 
 
-    
+
     // Nếu không có lỗi, tiến hành xử lý lưu trữ
     if (
         empty($thoiGianHenLayError) && empty($sdtNguoiNhanError) &&
         empty($diaChiNguoiNhanError) && empty($thanhPhoError) && empty($quanError) &&
         empty($phuongError) && empty($duongError) && empty($thoiGianHenGiaoError) &&
-        empty($loaiHangHoaError) && empty($nguoiTraCuocError) && empty($hoTenNguoiNhanError)&& 
+        empty($loaiHangHoaError) && empty($nguoiTraCuocError) && empty($hoTenNguoiNhanError) &&
         empty($loaiVanChuyenError) && empty($tinhChatHangHoaDacBietError) && empty($itemError)
     ) {
+
+        //======================================= API =========================================================
+        // Tìm bưu cục gần nhất
+
+        $result = findNearestAddress($diachi_fullGui, $mongoUri, $dbName, $collectionName, $googleApiKey);
+        if ($result['nearestAddress']) {
+            $diachibcnear = $result['nearestAddress']['diaChi'];
+            $tenbcnear = $result['nearestAddress']['tenBC'];
+            $idbcnear = $result['nearestAddress']['idBC'];
+            $tt = "Chờ xác nhận";
+            $quyTrinhVC[] = [
+                'trangthai' => $tt,
+                'idBC' => $idbcnear,
+                'tenBC' => $tenbcnear,
+                'diachiBC' => $diachibcnear
+            ];
+        }
+
+        //======================================= API =========================================================
+
         $kieuvc = VanDon::xacDinhKieuVanChuyen($thanhPhoGui, $thanhPho);
         $cuoc = VanDon::tinhCuocShip($tongTrongLuong, $kieuvc, $loaiVanChuyen);
-        $ketQua = VanDon::themDonHang(
-            $pdo,
-            $idus,
-            $thoiGianHenLay,
-            $hoTenNguoiNhan,
-            $sdtNguoiNhan,
-            $diaChiNguoiNhan,
-            $thanhPho,
-            $quan,
-            $phuong,
-            $duong,
-            $thoiGianHenGiao,
-            $loaiHangHoa,
-            $items,
-            $tinhChatHangHoaDacBiet,
-            $nguoiTraCuoc,
-            $cuoc,
-            $tienThuHo,
-            $loaiVanChuyen,
-            $ghiChu
-        );
-        
-        header("Location: thanhtoan.php");
+        // $ketQua = VanDon::themDonHang(
+        //     $pdo,
+        //     $idus,
+        //     $thoiGianHenLay,
+        //     $hoTenNguoiNhan,
+        //     $sdtNguoiNhan,
+        //     $diaChiNguoiNhan,
+        //     $thanhPho,
+        //     $quan,
+        //     $phuong,
+        //     $duong,
+        //     $thoiGianHenGiao,
+        //     $loaiHangHoa,
+        //     $items,
+        //     $tinhChatHangHoaDacBiet,
+        //     $nguoiTraCuoc,
+        //     $cuoc,
+        //     $tienThuHo,
+        //     $loaiVanChuyen,
+        //     $ghiChu,
+        //     $quyTrinhVC
+        // );
+
+        $_SESSION['orderData'] = [
+            'thoiGianHenLay' => $thoiGianHenLay,
+            'hoTenNguoiNhan' => $hoTenNguoiNhan,
+            'sdtNguoiNhan' => $sdtNguoiNhan,
+            'diaChiNguoiNhan' => $diaChiNguoiNhan,
+            'thanhPho' => $thanhPho,
+            'quan' => $quan,
+            'phuong' => $phuong,
+            'duong' => $duong,
+            'sonha' => $sonha,
+            'thoiGianHenGiao' => $thoiGianHenGiao,
+            'loaiHangHoa' => $loaiHangHoa,
+            'tinhChatHangHoaDacBiet' => $tinhChatHangHoaDacBiet,
+            'nguoiTraCuoc' => $nguoiTraCuoc,
+            'loaiVanChuyen' => $loaiVanChuyen,
+            'ghiChu' => $ghiChu,
+            'items' => $items,
+            'cuoc' => $cuoc,
+            'tienThuHo' => $tienThuHo,
+            'quyTrinhVC' => $quyTrinhVC
+        ];
+        header("Location: xacnhan.php");
         exit;
     }
 }
@@ -292,10 +347,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                             <label class="form-label my-1" style="font-size: 16px; display: block; margin-bottom: 8px;">Thời gian hẹn lấy:</label>
                                             <select style="display: block;" name="tghenlay" id="tghenlay">
                                                 <option value="">Chọn thời gian</option>
-                                                <option value="Sáng">Sáng</option>
-                                                <option value="Chiều">Chiều</option>
-                                                <option value="Tối">Tối</option>
-                                                <option value="Cả ngày">Cả ngày</option>
+                                                <option value="Sáng" <?= isset($thoiGianHenLay) && $thoiGianHenLay == 'Sáng' ? 'selected' : '' ?>>Sáng (7h30 - 12h00)</option>
+                                                <option value="Chiều" <?= isset($thoiGianHenLay) && $thoiGianHenLay == 'Chiều' ? 'selected' : '' ?>>Chiều (13h30 - 18h00)</option>
+                                                <option value="Tối" <?= isset($thoiGianHenLay) && $thoiGianHenLay == 'Tối' ? 'selected' : '' ?>>Tối (18h30 - 21h00)</option>
+                                                <option value="Cả ngày" <?= isset($thoiGianHenLay) && $thoiGianHenLay == 'Cả ngày' ? 'selected' : '' ?>>Cả ngày</option>
                                             </select>
                                             <span class="text-danger"><?= $thoiGianHenLayError ?></span>
                                         </div>
@@ -309,15 +364,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     </div>
                                     <div class="card-body">
                                         <label class="form-label my-1" style="font-size: 16px;">Họ tên:</label>
-                                        <input class="form-control" type="text" name="hoten" id="hoten" placeholder="Họ tên" value="">
+                                        <input class="form-control" type="text" name="hoten" id="hoten" placeholder="Họ tên" value="<?= $hoTenNguoiNhan ?>">
                                         <span class="text-danger"><?php echo "$hoTenNguoiNhanError </br>" ?></span>
 
                                         <label class="form-label my-1" style="font-size: 16px;">Điện thoại:</label>
-                                        <input class="form-control" type="text" name="sdt" id="sdt" placeholder="Số điện thoại" value="">
+                                        <input class="form-control" type="text" name="sdt" id="sdt" placeholder="Số điện thoại" value="<?= $sdtNguoiNhan ?>">
                                         <span class="text-danger"><?php echo "$sdtNguoiNhanError </br>" ?></span>
 
                                         <label class="form-label my-1" style="font-size: 16px;">Địa chỉ:</label>
-                                        <input class="form-control" type="text" name="diachi" id="diachi" placeholder="Địa chỉ chi tiết" value="">
+                                        <input class="form-control" style="border: 1px solid #ff5f13;" type="text" name="diachi_display" id="diachi_display" placeholder="Hãy nhập các trường bên dưới, để tạo ra địa chỉ" value="<?= $diaChiNguoiNhan ?>" disabled>
+                                        <input type="hidden" name="diachi" id="diachi" value="<?= $diaChiNguoiNhan?>">
                                         <span class="text-danger"><?= $diaChiNguoiNhanError ?></span>
 
                                         <div class="row">
@@ -336,28 +392,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                                 </div>
                                             </div>
                                             <div class="col-6 my-1">
-                                                <input class="form-control" type="text" name="quan" id="quan" placeholder="Quận/ Huyện" value="">
+                                                <input class="form-control" type="text" name="quan" id="quan" placeholder="Quận/ Huyện" value="<?= $quan ?>">
                                                 <span class="text-danger"><?= $quanError ?></span>
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col-6 my-1">
-                                                <input class="form-control" type="text" name="phuong" id="phuong" placeholder="Xã/ Phường" value="">
+                                            <div class="col-4 my-1">
+                                                <input class="form-control" type="text" name="phuong" id="phuong" placeholder="Xã/ Phường" value="<?= $phuong ?>">
                                                 <span class="text-danger"><?= $phuongError ?></span>
                                             </div>
-                                            <div class="col-6 my-1">
-                                                <input class="form-control" type="text" name="duong" id="duong" placeholder="Đường" value="">
+                                            <div class="col-4 my-1">
+                                                <input class="form-control" type="text" name="duong" id="duong" placeholder="Đường" value="<?= $duong ?>">
                                                 <span class="text-danger"><?= $duongError ?></span>
+                                            </div>
+                                            <div class="col-4 my-1">
+                                                <input class="form-control" type="text" name="sonha" id="sonha" placeholder="Số nhà" value="<?= $sonha ?>">
+                                                <span class="text-danger"><?= $sonhaError ?></span>
                                             </div>
                                         </div>
                                         <div class="form-group">
                                             <label class="form-label my-1" style="font-size: 16px; display: block; margin-bottom: 8px;">Thời gian hẹn giao:</label>
                                             <select style="display: block;" name="tghengiao" id="tghengiao">
                                                 <option value="">Chọn thời gian</option>
-                                                <option value="Sáng">Sáng</option>
-                                                <option value="Chiều">Chiều</option>
-                                                <option value="Tối">Tối</option>
-                                                <option value="Cả ngày">Cả ngày</option>
+                                                <option value="Sáng" <?= isset($thoiGianHenGiao) && $thoiGianHenGiao == 'Sáng' ? 'selected' : '' ?>>Sáng (7h30 - 12h00)</option>
+                                                <option value="Chiều" <?= isset($thoiGianHenGiao) && $thoiGianHenGiao == 'Chiều' ? 'selected' : '' ?>>Chiều (13h30 - 18h00)</option>
+                                                <option value="Tối" <?= isset($thoiGianHenGiao) && $thoiGianHenGiao == 'Tối' ? 'selected' : '' ?>>Tối (18h30 - 21h00)</option>
+                                                <option value="Cả ngày" <?= isset($thoiGianHenGiao) && $thoiGianHenGiao == 'Cả ngày' ? 'selected' : '' ?>>Cả ngày</option>
                                             </select>
                                             <span class="text-danger"><?= $thoiGianHenGiaoError ?></span>
                                         </div>
@@ -375,13 +435,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                         <div style="font-size: 17px; font-weight:600;">Loại hàng hóa</div>
                                         <div class="d-flex">
                                             <div class="form-check m-3">
-                                                <input class="form-check-input" type="radio" name="loaiHangHoa" id="loaiHangHoa" value="Bưu kiện" style="width: 15px; height: 15px;">
+                                                <input class="form-check-input" type="radio" name="loaiHangHoa" id="loaiHangHoa" value="Bưu kiện" <?php if (isset($loaiHangHoa) && $loaiHangHoa == 'Bưu kiện') echo 'checked'; ?> style="width: 15px; height: 15px;">
                                                 <label class="form-check-label" for="Bưu kiện" style="font-size: 15px;">
                                                     Bưu kiện
                                                 </label>
                                             </div>
                                             <div class="form-check m-3">
-                                                <input class="form-check-input" type="radio" name="loaiHangHoa" id="loaiHangHoa" value="Tài liệu" style="width: 15px; height: 15px;">
+                                                <input class="form-check-input" type="radio" name="loaiHangHoa" id="loaiHangHoa" value="Tài liệu" <?php if (isset($loaiHangHoa) && $loaiHangHoa == 'Tài liệu') echo 'checked'; ?> style="width: 15px; height: 15px;">
                                                 <label class="form-check-label" for="Tài liệu" style="font-size: 15px;">
                                                     Tài liệu
                                                 </label>
@@ -432,35 +492,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                         <div class="row no-gutters">
                                             <div class="col-4">
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" name="giaTriCao" id="giaTriCao" value="Giá trị cao">
+                                                    <input class="form-check-input" type="checkbox" name="giaTriCao" id="giaTriCao" value="Giá trị cao" <?php if (isset($tinhChatHangHoaDacBiet) && in_array('Giá trị cao', $tinhChatHangHoaDacBiet)) echo 'checked'; ?>>
                                                     <label class="form-check-label" for="giaTriCao">Giá trị cao</label>
                                                 </div>
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" name="deVo" id="deVo" value="Dễ vỡ">
+                                                    <input class="form-check-input" type="checkbox" name="deVo" id="deVo" value="Dễ vỡ" <?php if (isset($tinhChatHangHoaDacBiet) && in_array('Dễ vỡ', $tinhChatHangHoaDacBiet)) echo 'checked'; ?>>
                                                     <label class="form-check-label" for="deVo">Dễ vỡ</label>
                                                 </div>
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" name="nguyenKhoi" id="nguyenKhoi" value="Nguyên khối">
+                                                    <input class="form-check-input" type="checkbox" name="nguyenKhoi" id="nguyenKhoi" value="Nguyên khối" <?php if (isset($tinhChatHangHoaDacBiet) && in_array('Nguyên khối', $tinhChatHangHoaDacBiet)) echo 'checked'; ?>>
                                                     <label class="form-check-label" for="nguyenKhoi">Nguyên khối</label>
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" name="quaKho" id="quaKho" value="Quá khổ">
+                                                    <input class="form-check-input" type="checkbox" name="quaKho" id="quaKho" value="Quá khổ" <?php if (isset($tinhChatHangHoaDacBiet) && in_array('Quá khổ', $tinhChatHangHoaDacBiet)) echo 'checked'; ?>>
                                                     <label class="form-check-label" for="quaKho">Quá khổ</label>
                                                 </div>
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" name="chatLong" id="chatLong" value="Chất lỏng">
+                                                    <input class="form-check-input" type="checkbox" name="chatLong" id="chatLong" value="Chất lỏng" <?php if (isset($tinhChatHangHoaDacBiet) && in_array('Chất lỏng', $tinhChatHangHoaDacBiet)) echo 'checked'; ?>>
                                                     <label class="form-check-label" for="chatLong">Chất lỏng</label>
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" name="pin" id="pin" value="Từ tính, Pin">
+                                                    <input class="form-check-input" type="checkbox" name="pin" id="pin" value="Từ tính, Pin" <?php if (isset($tinhChatHangHoaDacBiet) && in_array('Từ tính, Pin', $tinhChatHangHoaDacBiet)) echo 'checked'; ?>>
                                                     <label class="form-check-label" for="pin">Từ tính, Pin</label>
                                                 </div>
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" name="hangLanh" id="hangLanh" value="HangLanh">
+                                                    <input class="form-check-input" type="checkbox" name="hangLanh" id="hangLanh" value="HangLanh" <?php if (isset($tinhChatHangHoaDacBiet) && in_array('Hàng lạnh', $tinhChatHangHoaDacBiet)) echo 'checked'; ?>>
                                                     <label class="form-check-label" for="hangLanh">Hàng lạnh</label>
                                                 </div>
                                             </div>
@@ -483,20 +543,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                                 <input class="form-control my-2" type="text" name="thuho" id="thuho" placeholder="Tiền thu hộ" value="">
 
                                                 <label class="form-label my-1" style="font-size: 16px;">Ghi chú:</label>
-                                                <textarea class="form-control" style="height:auto;" name="ghichu" id="ghichu" rows="3" placeholder="Nhập ghi chú tại đây..."></textarea>
+                                                <textarea class="form-control" style="height:auto;" name="ghichu" id="ghichu" rows="3" placeholder="Nhập ghi chú tại đây..."><?= $ghiChu ?></textarea>
                                             </div>
 
                                             <div class="col-6" style="padding-left: 20px;">
                                                 <div style="font-size: 17px; font-weight:600;">Người trả cước</div>
                                                 <div class="d-flex">
                                                     <div class="form-check m-3">
-                                                        <input class="form-check-input" type="radio" name="ngtracuoc" id="ngtracuoc" value="Người gửi" style="width: 15px; height: 15px;">
+                                                        <input class="form-check-input" type="radio" name="ngtracuoc" id="ngtracuoc" value="Người gửi" <?php if (isset($nguoiTraCuoc) && $nguoiTraCuoc == 'Người gửi') echo 'checked'; ?> style="width: 15px; height: 15px;">
                                                         <label class="form-check-label" for="ngtracuoc" style="font-size: 15px;">
                                                             Người gửi
                                                         </label>
                                                     </div>
                                                     <div class="form-check m-3">
-                                                        <input class="form-check-input" type="radio" name="ngtracuoc" id="ngtracuoc" value="Người nhận" style="width: 15px; height: 15px;">
+                                                        <input class="form-check-input" type="radio" name="ngtracuoc" id="ngtracuoc" value="Người nhận" <?php if (isset($nguoiTraCuoc) && $nguoiTraCuoc == 'Người nhận') echo 'checked'; ?> style="width: 15px; height: 15px;">
                                                         <label class="form-check-label" for="ngtracuoc" style="font-size: 15px;">
                                                             Người nhận
                                                         </label>
@@ -507,19 +567,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                                 <div style="font-size: 17px; font-weight:600;">Loại vận chuyển</div>
                                                 <div>
                                                     <div class="form-check m-2">
-                                                        <input class="form-check-input" type="radio" name="loaivanchuyen" id="loaivanchuyen" value="Bình thường" style="width: 15px; height: 15px;">
+                                                        <input class="form-check-input" type="radio" name="loaivanchuyen" id="loaivanchuyen" value="Bình thường" <?php if (isset($loaiVanChuyen) && $loaiVanChuyen == 'Bình thường') echo 'checked'; ?>  style="width: 15px; height: 15px;">
                                                         <label class="form-check-label" for="loaivanchuyen" style="font-size: 15px;">
                                                             Bình thường
                                                         </label>
                                                     </div>
                                                     <div class="form-check m-2">
-                                                        <input class="form-check-input" type="radio" name="loaivanchuyen" id="loaivanchuyen" value="Nhanh" style="width: 15px; height: 15px;">
+                                                        <input class="form-check-input" type="radio" name="loaivanchuyen" id="loaivanchuyen" value="Nhanh" <?php if (isset($loaiVanChuyen) && $loaiVanChuyen == 'Nhanh') echo 'checked'; ?> style="width: 15px; height: 15px;">
                                                         <label class="form-check-label" for="loaivanchuyen" style="font-size: 15px;">
                                                             Nhanh
                                                         </label>
                                                     </div>
                                                     <div class="form-check m-2">
-                                                        <input class="form-check-input" type="radio" name="loaivanchuyen" id="loaivanchuyen" value="Hỏa tốc" style="width: 15px; height: 15px;">
+                                                        <input class="form-check-input" type="radio" name="loaivanchuyen" id="loaivanchuyen" value="Hỏa tốc" <?php if (isset($loaiVanChuyen) && $loaiVanChuyen == 'Hỏa tốc') echo 'checked'; ?> style="width: 15px; height: 15px;">
                                                         <label class="form-check-label" for="loaivanchuyen" style="font-size: 15px;">
                                                             Hỏa tốc
                                                         </label>
@@ -658,6 +718,69 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         });
     }
     attachInputEvent();
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Hàm cập nhật địa chỉ chi tiết
+        function updateAddress() {
+            var thanhpho = document.getElementById('thanhpho').value;
+            var quan = document.getElementById('quan').value;
+            var phuong = document.getElementById('phuong').value;
+            var duong = document.getElementById('duong').value;
+            var sonha = document.getElementById('sonha').value;
+
+            // Tạo địa chỉ từ các trường nhập
+            var address = `${sonha} ${duong}, ${phuong}, ${quan}, ${thanhpho}`;
+
+            // Cập nhật giá trị vào trường địa chỉ chi tiết
+            document.getElementById('diachi').value = address;
+            document.getElementById('diachi_display').value = address;
+        }
+
+        // Lắng nghe sự thay đổi trên các trường nhập
+        document.getElementById('thanhpho').addEventListener('change', updateAddress);
+        document.getElementById('quan').addEventListener('input', updateAddress);
+        document.getElementById('phuong').addEventListener('input', updateAddress);
+        document.getElementById('duong').addEventListener('input', updateAddress);
+        document.getElementById('sonha').addEventListener('input', updateAddress);
+    });
+
+    //Hiển thị quận khi chọn thành phố=======================================================
+    // document.addEventListener('DOMContentLoaded', function() {
+    //     const citySelect = document.getElementById('thanhpho');
+    //     const districtSelect = document.getElementById('quan');
+
+    //     citySelect.addEventListener('change', function() {
+    //         const city = citySelect.value;
+
+    //         if (city) {
+    //             fetch(`get_districts.php?city=${encodeURIComponent(city)}`)
+    //                 .then(response => response.json())
+    //                 .then(districts => {
+    //                     // Xóa tất cả các option cũ
+    //                     districtSelect.innerHTML = '';
+
+    //                     // Thêm một option mặc định
+    //                     const defaultOption = document.createElement('option');
+    //                     defaultOption.text = 'Chọn quận';
+    //                     defaultOption.value = '';
+    //                     districtSelect.add(defaultOption);
+
+    //                     // Thêm các quận mới vào danh sách
+    //                     districts.forEach(district => {
+    //                         const option = document.createElement('option');
+    //                         option.text = district;
+    //                         option.value = district;
+    //                         districtSelect.add(option);
+    //                     });
+    //                 })
+    //                 .catch(error => console.error('Error fetching districts:', error));
+    //         } else {
+    //             // Xóa tất cả các option nếu không có thành phố được chọn
+    //             districtSelect.innerHTML = '<option value="">Chọn quận</option>';
+    //         }
+    //     });
+    // });
 </script>
 
 <!-- =============================================================================================== -->

@@ -91,7 +91,7 @@ class VanDon
         return (int )$phiCuoiCung;
     }
 
-    public static function themDonHang($pdo, $idKHGui, $thoiGianHenLay, $hoTenNguoiNhan, $sdtNguoiNhan, $diaChiNguoiNhan, $thanhPho, $quan, $phuong, $duong, $thoiGianHenGiao, $loaiHangHoa, $items, $tinhChatHangHoaDacBiet, $nguoiTraCuoc, $cuoc, $tienThuHo, $loaiVanChuyen, $ghiChu)
+    public static function themDonHang($pdo, $idKHGui, $thoiGianHenLay, $hoTenNguoiNhan, $sdtNguoiNhan, $diaChiNguoiNhan, $thanhPho, $quan, $phuong, $duong, $thoiGianHenGiao, $loaiHangHoa, $items, $tinhChatHangHoaDacBiet, $nguoiTraCuoc, $cuoc, $tienThuHo, $loaiVanChuyen, $ghiChu, $quyTrinhVC)
     {
         $collection = $pdo->VanDon;
 
@@ -123,7 +123,8 @@ class VanDon
             'loaiVanChuyen' => $loaiVanChuyen,
             'ghiChu' => $ghiChu,
             'ngayTao' => new MongoDB\BSON\UTCDateTime(), // Ngày giờ hiện tại
-            'tinhTrang' => 'Chưa giao' // Hoặc trạng thái mặc định của bạn
+            'tinhTrang' => 'Chưa giao', // Hoặc trạng thái mặc định của bạn
+            'quyTrinhVC' => $quyTrinhVC,
         ];
 
         try {
