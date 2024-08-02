@@ -35,6 +35,8 @@ $quanError = '';
 $phuongError = '';
 $duongError = '';
 $sonhaError = '';
+$cccdError = '';
+$chucvuError = '';
 
 $hoten = '';
 $gioitinh = '';
@@ -49,6 +51,8 @@ $quan = '';
 $phuong = '';
 $duong = '';
 $sonha = '';
+$cccd = '';
+$chucvu = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $hoten = $_POST['hoten'];
@@ -64,6 +68,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $phuong = $_POST['phuong'];
     $duong = $_POST['duong'];
     $sonha = $_POST['sonha'];
+    $cccd = $_POST['cccd'];
+    $chucvu = $_POST['chucvu'];
 
     // Kiểm tra họ tên
     if (empty($hoten)) {
@@ -107,7 +113,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($sdt)) {
         $sdtError = 'Hãy nhập số điện thoại';
     } elseif (!preg_match("/^\d{10}$/", $sdt)) {
-        $sdtError = 'Số điện thoại không hợp lệ';
+        $sdtError = 'Số điện thoại phải là 10 số';
     }
 
     // Kiểm tra địa chỉ
@@ -117,7 +123,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         //API googlemap
         $switchLocation = geocodeAddress($diachi, $googleApiKey);
         if ($switchLocation === false) {
-            $diachiError = "Địa chỉ người nhận bạn nhập không tồn tại";
+            $diachiError = "Địa chỉ nhân viên bạn nhập không tồn tại";
         }
     }
 
@@ -138,6 +144,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($sonha)) {
         $sonhaError = 'Hãy nhập số nhà';
     }
+
+    // Kiểm tra số điện thoại
+    if (empty($cccd)) {
+        $sdtError = 'Hãy nhập số điện thoại';
+    } elseif (!preg_match("/^\d{12}$/", $cccd)) {
+        $cccdError = 'Căn cước công dẫn phải là 12 số';
+    }
+
+    if (empty($chucvu)) {
+        $chucvuError = 'Hãy chọn chức vụ';
+    }
+
+
 
     // Nếu không có lỗi nào, thêm khách hàng mới vào MongoDB
     if (empty($hotenError) && empty($gioitinhError) && empty($emailError) && empty($passError) && empty($passcfError) && empty($ngaysinhError) && empty($sdtError) && empty($diachiError) && empty($thanhphoError) && empty($quanError) && empty($phuongError) && empty($duongError)) {
@@ -178,7 +197,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <div class="col-lg-12">
                                 <!-- Section Tittle -->
                                 <div class="section-tittle mb-50 text-center">
-                                    <h2>Đăng ký</h2>
+                                    <h2>Thêm nhân viên</h2>
                                 </div>
                             </div>
                         </div>
@@ -275,6 +294,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         <label class="form-label my-1" style="font-size: 16px;">Email:</label>
                                         <input type="text" id="email" name="email" value="<?= $email ?>" placeholder="Email">
                                         <span class="text-danger"><?= $emailError ?></span>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="input-form">
+                                        <label class="form-label my-1" style="font-size: 16px;">CCCD:</label>
+                                        <input type="text" id="cccd" name="cccd" value="<?= $cccd ?>" placeholder="Căn cước công dân">
+                                        <span class="text-danger"><?= $cccdError ?></span>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6">
+                                    <div class="select-items">
+                                        <label class="form-label my-1" style="font-size: 16px; display: block;">Chức vụ:</label>
+                                        <select name="chucvu" id="chucvu" class="form-select">
+                                            <option value="" <?= isset($chucvu) && $chucvu == '' ? 'selected' : '' ?>>Chọn chức vụ</option>
+                                            <option value="Quản lý" <?= isset($chucvu) && $chucvu == 'Quản lý' ? 'selected' : '' ?>>Quản lý</option>
+                                            <option value="Nhân viên" <?= isset($chucvu) && $chucvu == 'Nhân viên' ? 'selected' : '' ?>>Nhân viên</option>
+                                            <option value="Shipper" <?= isset($chucvu) && $chucvu == 'Shipper' ? 'selected' : '' ?>>Shipper</option>
+                                        </select>
+                                        <span class="text-danger"><?= $chucvuError ?></span>
                                     </div>
                                 </div>
                                 <div class="col-lg-12">
