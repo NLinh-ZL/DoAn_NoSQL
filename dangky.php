@@ -4,6 +4,7 @@ require_once "inc/header.php";
 <!-- =============================================================================================== -->
 <?php
 require_once "class/KhachHang.php";
+require_once "class/API.php";
 
 $vietnamProvinces = [
     'An Giang', 'Bạc Liêu', 'Bắc Cạn', 'Bắc Giang', 'Bắc Ninh', 'Bình Dương', 
@@ -33,6 +34,7 @@ $thanhphoError = '';
 $quanError = '';
 $phuongError = '';
 $duongError = '';
+$sonhaError = '';
 
 $hoten = '';
 $gioitinh = '';
@@ -46,6 +48,7 @@ $thanhpho = '';
 $quan = '';
 $phuong = '';
 $duong = '';
+$sonha = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $hoten = $_POST['hoten'];
@@ -60,6 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $quan = $_POST['quan'];
     $phuong = $_POST['phuong'];
     $duong = $_POST['duong'];
+    $sonha = $_POST['sonha'];
 
     // Kiểm tra họ tên
     if (empty($hoten)) {
@@ -109,7 +113,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Kiểm tra địa chỉ
     if (empty($diachi)) {
         $diachiError = 'Hãy nhập địa chỉ cụ thể';
+    }else {
+        //API googlemap
+        $switchLocation = geocodeAddress($diachi, $googleApiKey);
+        if ($switchLocation === false) {
+            $diachiError = "Địa chỉ người nhận bạn nhập không tồn tại";
+        }
     }
+
+
     if (empty($thanhpho)) {
         $thanhphoError = 'Hãy chọn tỉnh';
     }
@@ -121,6 +133,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     if (empty($duong)) {
         $duongError = 'Hãy nhập đường';
+    }
+
+    if (empty($sonha)) {
+        $sonhaError = 'Hãy nhập số nhà';
     }
 
     // Nếu không có lỗi nào, thêm khách hàng mới vào MongoDB
@@ -179,7 +195,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <div class="col-lg-12">
                                     <div class="input-form">
                                         <label class="form-label my-1" style="font-size: 16px;">Địa chỉ:</label>
-                                        <input type="text" id="diachi" name="diachi" value="<?= $diachi ?>" placeholder="Địa chỉ">
+                                        <input type="text" style="border: 1px solid #ff5f13;" id="diachi_display" name="diachi_display" placeholder="Hãy nhập các trường bên dưới, để tạo ra địa chỉ" value="<?= $diachi ?>" placeholder="Địa chỉ" disabled>
+                                        <input type="hidden" name="diachi" id="diachi" value="<?= $diachi?>">
                                         <span class="text-danger"><?= $diachiError ?></span>
                                     </div>
                                 </div>
@@ -200,22 +217,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <div class="col-lg-6 col-md-6">
                                     <div class="input-form">
                                         <label class="form-label my-1" style="font-size: 16px;">Quận/ Huyện:</label>
-                                        <input type="text" id="quan" name="quan" value="<?= $quan ?>" placeholder="Quận">
+                                        <input type="text" id="quan" name="quan" value="<?= $quan ?>" placeholder="Quận/Huyện">
                                         <span class="text-danger"><?= $quanError ?></span>
                                     </div>
                                 </div>
-                                <div class="col-lg-6 col-md-6">
+                                <div class="col-lg-4 col-md-4">
                                     <div class="input-form">
                                         <label class="form-label my-1" style="font-size: 16px;">Xã/ Phường:</label>
-                                        <input type="text" id="phuong" name="phuong" value="<?= $phuong ?>" placeholder="Phường">
+                                        <input type="text" id="phuong" name="phuong" value="<?= $phuong ?>" placeholder="Phường/Xã">
                                         <span class="text-danger"><?= $phuongError ?></span>
                                     </div>
                                 </div>
-                                <div class="col-lg-6 col-md-6">
+                                <div class="col-lg-4 col-md-4">
                                     <div class="input-form">
                                         <label class="form-label my-1" style="font-size: 16px;">Đường:</label>
                                         <input type="text" id="duong" name="duong" value="<?= $duong ?>" placeholder="Đường">
                                         <span class="text-danger"><?= $duongError ?></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-4 col-md-4">
+                                    <div class="input-form">
+                                        <label class="form-label my-1" style="font-size: 16px;">Đường:</label>
+                                        <input type="text" id="sonha" name="sonha" value="<?= $sonha ?>" placeholder="Số nhà">
+                                        <span class="text-danger"><?= $sonhaError ?></span>
                                     </div>
                                 </div>
 
@@ -279,6 +304,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </section>
     <!-- contact-form end -->
 </main>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function() {
+        // Hàm cập nhật địa chỉ chi tiết
+        function updateAddress() {
+            var thanhpho = document.getElementById('thanhpho').value;
+            var quan = document.getElementById('quan').value;
+            var phuong = document.getElementById('phuong').value;
+            var duong = document.getElementById('duong').value;
+            var sonha = document.getElementById('sonha').value;
+
+            // Tạo địa chỉ từ các trường nhập
+            var address = `${sonha} ${duong}, ${phuong}, ${quan}, ${thanhpho}`;
+
+            // Cập nhật giá trị vào trường địa chỉ chi tiết
+            document.getElementById('diachi').value = address;
+            document.getElementById('diachi_display').value = address;
+        }
+
+        // Lắng nghe sự thay đổi trên các trường nhập
+        document.getElementById('thanhpho').addEventListener('change', updateAddress);
+        document.getElementById('quan').addEventListener('input', updateAddress);
+        document.getElementById('phuong').addEventListener('input', updateAddress);
+        document.getElementById('duong').addEventListener('input', updateAddress);
+        document.getElementById('sonha').addEventListener('input', updateAddress);
+    });
+
+</script>
 
 <!-- =============================================================================================== -->
 <?php
