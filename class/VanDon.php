@@ -1,7 +1,57 @@
 <?php
 
-class VanDon
-{
+Class VanDon{
+
+    public static function getAllpage($database, $limit, $offset, $tinhtrang = null) {
+        $collection = $database->VanDon; // Chọn bộ sưu tập 'VanDon'
+    
+        if ($collection === null) {
+            die("Bộ sưu tập không tồn tại: VanDon");
+        }
+    
+        // Điều kiện tìm kiếm
+        $query = [];
+        if ($tinhtrang !== null) {
+            $query['tinhTrang'] = $tinhtrang;
+        }
+    
+        // Tìm dữ liệu với phân trang
+        $options = [
+            'limit' => $limit,
+            'skip' => $offset,
+            'sort' => ['ngayTao' => 1] // Sắp xếp theo ngày tạo giảm dần (hoặc bạn có thể thay đổi theo nhu cầu)
+        ];
+    
+        $cursor = $collection->find($query, $options); // Lấy dữ liệu từ bộ sưu tập
+        $results = [];
+    
+        foreach ($cursor as $document) {
+            $results[] = $document;
+        }
+    
+        return $results;
+    }
+
+    public static function countAll($database,$limit , $tinhtrang = null) {
+        $collection = $database->VanDon; // Chọn bộ sưu tập 'VanDon'
+    
+        if ($collection === null) {
+            die("Bộ sưu tập không tồn tại: VanDon");
+        }
+    
+        // Điều kiện tìm kiếm
+        $query = [];
+        if ($tinhtrang !== null) {
+            $query['tinhTrang'] = $tinhtrang;
+        }
+    
+        // Đếm tổng số phần tử với điều kiện lọc
+        $count = $collection->countDocuments($query);
+    
+        $total_pages = ceil($count / $limit);
+
+        return $total_pages;
+    }
     public static function xacDinhKieuVanChuyen($tinhGui, $tinhNhan)
     {
         // Định nghĩa các khu vực của Việt Nam
@@ -159,3 +209,4 @@ class VanDon
         return $newId; // Giữ giá trị là kiểu số
     }
 }
+?>
