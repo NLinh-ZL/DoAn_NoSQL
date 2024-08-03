@@ -2,13 +2,13 @@
 require_once "inc/header1.php";
 require_once "class/Database.php";
 require "class/VanDon.php";
-require "class/NhanVien.php";
+require "class/BuuCuc.php";
 //Tạo số trang
 $page = isset($_GET['page']) ? $_GET['page'] : 1;
 $limit = 10;
 // $offset = ($page - 1) * $limit;
 
-$NhanVienDangNhap = NhanVien::getNhanVienById($pdo,  isset( $_SESSION['logged_id'])?  $_SESSION['logged_id']:null);
+$NhanVienDangNhap = BuuCuc::getNhanVienById($pdo,  isset( $_SESSION['logged_id'])?  $_SESSION['logged_id']:null);
 // $db = new Database();
 // $database = $db->getConnect();
 $collection = $pdo->VanDon; // Chọn bộ sưu tập 'VanDon'
@@ -44,9 +44,9 @@ $customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHan
 // $HuyGiao = VanDon::getAllpage($pdo, $limit, $offset, 'Hủy giao');
 // $DangGiao = VanDon::getAllpage($pdo, $limit, $offset, 'Đang giao');
 // Lấy nhân viên giao hàng
-$deliveryStaff = NhanVien::getAllDeliveryStaff($pdo);
+$deliveryStaff = BuuCuc::getAllDeliveryStaff($pdo);
 
-$Nhanvien = isset($_GET['idNhanVien']) ? NhanVien::getNhanVienById($pdo, $_GET['idNhanVien']) : null;
+$Nhanvien = isset($_GET['idNhanVien']) ? BuuCuc::getNhanVienById($pdo, $_GET['idNhanVien']) : null;
 
 if (isset($_GET['action']) && isset($_GET['idVD']) && isset($_GET['idNhanVien'])) {
     $action = $_GET['action'];

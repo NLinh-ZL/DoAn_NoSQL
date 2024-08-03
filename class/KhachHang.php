@@ -99,6 +99,8 @@ class KhachHang {
         unset($_SESSION['logged_us']);
         unset($_SESSION['logged_role']);
         unset($_SESSION['logged_name']);
+        unset($_SESSION['logged_id']);
+        unset($_SESSION['logged_chucvu']);
         header("location: index.php"); 
         exit;
     }

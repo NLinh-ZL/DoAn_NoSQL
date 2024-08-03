@@ -5,6 +5,7 @@
 
 <?php 
 require_once "class/KhachHang.php";
+require_once "class/BuuCuc.php";
 
     $emailError = '';
     $passError = '';
@@ -32,13 +33,23 @@ require_once "class/KhachHang.php";
         if (empty($emailError) && empty($passError)) {
             
             $loginResult = KhachHang::isValid($pdo, $email, $pass);
-            if ($loginResult === true) {
-                $us = KhachHang::getUser($pdo, $email, $pass);
-                $_SESSION['logged_us'] = serialize($us);
-                $_SESSION['logged_role'] = $us->role;
-                $_SESSION['logged_name'] = $us->hoTen;
-                $_SESSION['logged_id'] = $us->idKH;            
-                header("Location: index.php");
+            $loginResultNv = BuuCuc::isValid($pdo, $email, $pass);
+            if ($loginResult === true || $loginResultNv === true ) {
+                if($loginResult=== true){
+                    $us = KhachHang::getUser($pdo, $email, $pass);
+                    $_SESSION['logged_us'] = serialize($us);
+                    $_SESSION['logged_role'] = $us->role;
+                    $_SESSION['logged_name'] = $us->hoTen;
+                    $_SESSION['logged_id'] = $us->idKH;
+                } else if($loginResultNv === true){
+                    $us = BuuCuc::getUser($pdo, $email, $pass);
+                    $_SESSION['logged_us'] = serialize($us);
+                    $_SESSION['logged_role'] = $us->role;
+                    $_SESSION['logged_name'] = $us->hoTen;
+                    $_SESSION['logged_id'] = $us->idNV;
+                    $_SESSION['logged_chucvu'] = $us->chucvu;
+                }
+                
                 // if ($_SESSION['logged_role'] == "1") {
                 //     header("Location: admin.php");
                 //     exit;
