@@ -3,60 +3,26 @@ require_once "inc/header.php";
 ?>
 <!-- =============================================================================================== -->
 <?php
-require_once "class/VanDon.php";
-require_once "class/KhachHang.php";
+require_once "class/BuuCuc.php";
 
-if (!isset($_SESSION['orderData'])) {
-    header("Location: index.php");
-    exit;
-}
 
-$orderData = $_SESSION['orderData'];
+
 
 $idus = $_SESSION['logged_id'];
 
-$us = KhachHang::getUserById($pdo, $idus);
-$hoTenGui = $us['hoTen'];
+// Lấy tham số từ URL
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$limit = 2; // Số lượng nhân viên trên mỗi trang
+$search = isset($_GET['search']) ? $_GET['search'] : '';
+$sortColumn = isset($_GET['sortColumn']) ? $_GET['sortColumn'] : 'idNV';
+$sortOrder = isset($_GET['sortOrder']) ? $_GET['sortOrder'] : 'asc';
 
-// Kiểm tra xác nhận
-if (isset($_POST['confirm']) && $_POST['confirm'] == 'yes') {
+// Lấy danh sách nhân viên
+$danhSachNhanVien = BuuCuc::getNhanVienList($pdo, $page, $limit, $search, $sortColumn, $sortOrder);
 
-    // Lưu dữ liệu vào cơ sở dữ liệu
-    $result = VanDon::themDonHang(
-        $pdo,
-        $_SESSION['logged_id'],
-        $orderData['thoiGianHenLay'],
-        $orderData['hoTenNguoiNhan'],
-        $orderData['sdtNguoiNhan'],
-        $orderData['diaChiNguoiNhan'],
-        $orderData['thanhPho'],
-        $orderData['quan'],
-        $orderData['phuong'],
-        $orderData['duong'],
-        $orderData['thoiGianHenGiao'],
-        $orderData['loaiHangHoa'],
-        $orderData['items'],
-        $orderData['tinhChatHangHoaDacBiet'],
-        $orderData['nguoiTraCuoc'],
-        $orderData['cuoc'],
-        $orderData['tienThuHo'],
-        $orderData['loaiVanChuyen'],
-        $orderData['ghiChu'],
-        $orderData['quyTrinhVC']
-    );
-
-    // Xóa dữ liệu khỏi session sau khi đã lưu
-    unset($_SESSION['orderData']);
-
-    // Chuyển hướng đến trang thanh toán
-    // header("Location: thanhtoan.php");
-    // exit;
-} elseif (isset($_GET['confirm']) && $_GET['confirm'] == 'no') {
-    // Nếu nhấn nút hủy, xóa dữ liệu khỏi session và trở về trang tạo đơn
-    unset($_SESSION['orderData']);
-    header("Location: taodon.php");
-    exit;
-}
+// Tính tổng số trang
+$totalPages = BuuCuc::getTotalPages($pdo, $limit, $search);
+echo $totalPages;
 ?>
 
 <style>
@@ -92,97 +58,148 @@ if (isset($_POST['confirm']) && $_POST['confirm'] == 'yes') {
 
         <div class="row">
             <div class="col-12 text-center">
-                <div class="large-text">XÁC NHẬN</div>
+                <div class="large-text">Quản lý nhân viên</div>
             </div>
             <div class="col-lg-12">
-                <form class="form-contact contact_form" method="POST" action="#">
+                <div class="card form-group box-sender">
+                    <div class="card-header">
 
-                    <div class="card form-group box-sender">
-                        <div class="card-body">
 
-                            <div class="row no-gutters">
-                                <table class="table table-bordered mt-4" style="border: 2px solid black;">
+                        <div class="row">
+                            <!-- Tìm kiếm nhân viên -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <div class="card p-3 ">
+                                    <form id="search-employee" class="contact-form" method="GET">
+                                        <div class="row g-2">
+                                            <div class="col-12">
+                                                <input type="text" id="search" name="search" class="form-control me-2" value="<?= $search ?>" placeholder="Nhập tên nhân viên muốn tìm">
+                                            </div>
+                                            <div class="col my-2">
+                                                <button type="submit" class="btn btn-dark">Tìm kiếm</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Sắp xếp trường -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <div class="card p-3">
+                                    <form id="sort-school" class="contact-form" method="GET">
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <select name="sortColumn" id="sortColumn" class="form-select">
+                                                    <option value="" <?= isset($sortColumn) && $sortColumn == '' ? 'selected' : '' ?>>Cột sắp xếp</option>
+                                                    <option value="idNV" <?= isset($sortColumn) && $sortColumn == 'idNV' ? 'selected' : '' ?>>ID</option>
+                                                    <option value="hoTen" <?= isset($sortColumn) && $sortColumn == 'hoTen' ? 'selected' : '' ?>>Họ tên</option>
+                                                    <option value="desc" <?= isset($sortColumn) && $sortColumn == 'chucVu' ? 'selected' : '' ?>>Chức vụ</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-6">
+                                                <select name="sortOrder" id="sortOrder" class="form-select">
+                                                    <option value="" <?= isset($sortOrder) && $sortOrder == '' ? 'selected' : '' ?>>Kiểu sắp xếp</option>
+                                                    <option value="asc" <?= isset($sortOrder) && $sortOrder == 'asc' ? 'selected' : '' ?>>Tăng</option>
+                                                    <option value="chucVu" <?= isset($sortOrder) && $sortOrder == 'desc' ? 'selected' : '' ?>>Giảm</option>
+                                                </select>
+                                            </div>
+                                            <div class="col my-2">
+                                                <button type="submit" class="btn btn-dark w-100">Sắp xếp</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+
+                    </div>
+                    <div class="card-body">
+
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" style="border: 2px solid black;">
                                     <thead>
                                         <tr>
-                                            <th style="border: 2px solid black;">Tên hàng hóa</th>
-                                            <th style="border: 2px solid black;">Số lượng</th>
-                                            <th style="border: 2px solid black;">Trọng lượng</th>
-                                            <th style="border: 2px solid black;">Giá trị</th>
+                                            <th style="border: 2px solid black; text-align: center;">ID</th>
+                                            <th style="border: 2px solid black; text-align: center;">Họ tên</th>
+                                            <th style="border: 2px solid black; text-align: center;">Chức vụ</th>
+                                            <th style="border: 2px solid black; text-align: center;">Giới tính</th>
+                                            <th style="border: 2px solid black; text-align: center;">Thành phố</th>
+                                            <th style="border: 2px solid black; text-align: center;">Ngày sinh</th>
+                                            <th style="border: 2px solid black; text-align: center;">Thêm</th>
                                         </tr>
                                     </thead>
-                                    <tbody style="font-size: 18px; font-weight:600; color:tomato">
-                                        <?php foreach ($orderData['items'] as $item) : ?>
-                                            <tr>
-                                                <td style="border: 2px solid black;"><?= $item['tenHang'] ?></td>
-                                                <td style="border: 2px solid black;"><?= $item['soLuong'] ?></td>
-                                                <td style="border: 2px solid black;"><?= $item['trongLuong'] ?> gr</td>
-                                                <td style="border: 2px solid black;"><?= number_format($item['giaTien'], 0, ',', '.') ?> VNĐ</td>
-                                            </tr>
+                                    <tbody style="font-size: 18px; font-weight: 600; color: tomato;">
+                                        <?php foreach ($danhSachNhanVien as $Items) : ?>
+                                            <?php foreach ($Items->nhanVien as $item) : ?>
+                                                <tr>
+                                                    <td style="border: 2px solid black; text-align: center;"><?php echo htmlspecialchars($item->idNV); ?></td>
+                                                    <td style="border: 2px solid black; text-align: center;"><?php echo htmlspecialchars($item->hoTen); ?></td>
+                                                    <td style="border: 2px solid black; text-align: center;"><?php echo htmlspecialchars($item->chucVu); ?></td>
+                                                    <td style="border: 2px solid black; text-align: center;"><?php echo htmlspecialchars($item->gioiTinh); ?></td>
+                                                    <td style="border: 2px solid black; text-align: center;"><?php echo htmlspecialchars($item->diaChi->thanhPho); ?></td>
+                                                    <td style="border: 2px solid black; text-align: center;">
+                                                        <?php
+                                                        $date = $item->ngaySinh->toDateTime(); // Chuyển đổi sang DateTime
+                                                        echo htmlspecialchars($date->format('d/m/Y'));
+                                                        ?>
+                                                    </td>
+                                                    <td style="border: 2px solid black; text-align: center;">
+                                                        <a class="btn bg-primary" href="#">Sửa</a>
+                                                        <a class="btn bg-danger" href="#">Xóa</a>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
                                         <?php endforeach; ?>
                                     </tbody>
                                 </table>
-                            </div>
 
-                            <div class="row no-gutters">
-                                <div class="col-6" style="font-size: 20px; font-weight:700;">Tên người gửi:</div>
-                                <div class="col-6" style="font-size: 18px; font-weight:600;"><?= $hoTenGui  ?></div>
-                            </div>
-                            <hr>
+                                <!-- Phân trang -->
+                                <div class="d-flex justify-content-center mt-4">
+                                    <nav aria-label="Page navigation">
+                                        <ul class="pagination">
+                                            <?php if ($page > 1) : ?>
+                                                <li class="page-item">
+                                                    <a class="page-link" href="quanlynv.php?page=1&search=<?= urlencode($search) ?>&sortColumn=<?= urlencode($sortColumn) ?>&sortOrder=<?= urlencode($sortOrder) ?>" aria-label="First">
+                                                        <span aria-hidden="true">&laquo;&laquo;</span>
+                                                    </a>
+                                                </li>
+                                                <li class="page-item">
+                                                    <a class="page-link" href="quanlynv.php?page=<?= $page - 1 ?>&search=<?= urlencode($search) ?>&sortColumn=<?= urlencode($sortColumn) ?>&sortOrder=<?= urlencode($sortOrder) ?>" aria-label="Previous">
+                                                        <span aria-hidden="true">&laquo;</span>
+                                                    </a>
+                                                </li>
+                                            <?php endif; ?>
 
-                            <div class="row no-gutters">
-                                <div class="col-6" style="font-size: 20px; font-weight:700;">Họ tên người nhận:</div>
-                                <div class="col-6" style="font-size: 18px; font-weight:600;"><?= $orderData['hoTenNguoiNhan'] ?></div>
-                            </div>
-                            <hr>
+                                            <?php for ($i = 1; $i <= $totalPages; $i++) : ?>
+                                                <li class="page-item <?= $i == $page ? 'active' : '' ?>">
+                                                    <a class="page-link" href="quanlynv.php?page=<?= $i ?>&search=<?= urlencode($search) ?>&sortColumn=<?= urlencode($sortColumn) ?>&sortOrder=<?= urlencode($sortOrder) ?>"><?= $i ?></a>
+                                                </li>
+                                            <?php endfor; ?>
 
-                            <div class="row no-gutters">
-                                <div class="col-6" style="font-size: 20px; font-weight:700;">Số điện thoại người nhận:</div>
-                                <div class="col-6" style="font-size: 18px; font-weight:600;"><?= $orderData['sdtNguoiNhan'] ?></div>
-                            </div>
-                            <hr>
+                                            <?php if ($page < $totalPages) : ?>
+                                                <li class="page-item">
+                                                    <a class="page-link" href="quanlynv.php?page=<?= $page + 1 ?>&search=<?= urlencode($search) ?>&sortColumn=<?= urlencode($sortColumn) ?>&sortOrder=<?= urlencode($sortOrder) ?>" aria-label="Next">
+                                                        <span aria-hidden="true">&raquo;</span>
+                                                    </a>
+                                                </li>
+                                                <li class="page-item">
+                                                    <a class="page-link" href="quanlynv.php?page=<?= $totalPages ?>&search=<?= urlencode($search) ?>&sortColumn=<?= urlencode($sortColumn) ?>&sortOrder=<?= urlencode($sortOrder) ?>" aria-label="Last">
+                                                        <span aria-hidden="true">&raquo;&raquo;</span>
+                                                    </a>
+                                                </li>
+                                            <?php endif; ?>
+                                        </ul>
+                                    </nav>
+                                </div>
 
-                            <div class="row no-gutters">
-                                <div class="col-6" style="font-size: 20px; font-weight:700;">Địa chỉ người nhận:</div>
-                                <div class="col-6" style="font-size: 18px; font-weight:600;"><?= $orderData['diaChiNguoiNhan'] ?></div>
-                            </div>
-                            <hr>
-
-                            <div class="row no-gutters">
-                                <div class="col-6" style="font-size: 20px; font-weight:700;">Người trả cước:</div>
-                                <div class="col-6" style="font-size: 18px; font-weight:600;"><?= $orderData['nguoiTraCuoc'] ?></div>
-                            </div>
-                            <hr>
-
-                            <div class="row no-gutters">
-                                <div class="col-6" style="font-size: 20px; font-weight:700;">Loại vận chuyển:</div>
-                                <div class="col-6" style="font-size: 18px; font-weight:600;"><?= $orderData['loaiVanChuyen'] ?></div>
-                            </div>
-                            <hr>
-
-                            <div class="row no-gutters">
-                                <div class="col-6" style="font-size: 20px; font-weight:700;">Tiền thu hộ:</div>
-                                <div class="col-6" style="font-size: 18px; font-weight:600;"><?= number_format($orderData['tienThuHo'], 0, ',', '.') ?> VNĐ</div>
-                            </div>
-                            <hr>
-
-                            <div class="row no-gutters">
-                                <div class="col-6" style="font-size: 20px; font-weight:700;">Tiền cước:</div>
-                                <div class="col-6" style="font-size: 18px; font-weight:600;"><?= number_format($orderData['cuoc'], 0, ',', '.') ?> VNĐ</div>
                             </div>
                         </div>
                     </div>
-
-                    <div class="form-group mt-3">
-                        <div class="row">
-                            <div class="col-6">
-                                <button type="submit" name="confirm" value="yes" class="btn btn-dark mt-3 w-100" style="font-size: 20px; font-weight:900;">XÁC NHẬN TẠO PHIẾU</button>
-                            </div>
-                            <div class="col-6">
-                                <a href="?confirm=no" class="btn btn-danger mt-3 w-100" style="font-size: 20px; font-weight:900;">HỦY</a>
-                            </div>
-                        </div>
-                    </div>
-                </form>
+                </div>
             </div>
 
         </div>
@@ -190,7 +207,6 @@ if (isset($_POST['confirm']) && $_POST['confirm'] == 'yes') {
 
     </div>
 </section>
-
 
 <!-- =============================================================================================== -->
 <?php

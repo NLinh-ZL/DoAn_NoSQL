@@ -252,7 +252,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                                 <div class="col-lg-4 col-md-4">
                                     <div class="input-form">
-                                        <label class="form-label my-1" style="font-size: 16px;">Đường:</label>
+                                        <label class="form-label my-1" style="font-size: 16px;">Số nhà:</label>
                                         <input type="text" id="sonha" name="sonha" value="<?= $sonha ?>" placeholder="Số nhà">
                                         <span class="text-danger"><?= $sonhaError ?></span>
                                     </div>
@@ -309,6 +309,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <!-- Button -->
                                 <div class="col-lg-12">
                                     <button name="submit" class="submit-btn">Đăng ký</button>
+                                </div>
+                                <div class="col-lg-12">
+                                    <a class="my-2 btn bg-primary" href="dangnhap.php">Đăng nhập</a>
                                 </div>
                             </div>
                         </form>

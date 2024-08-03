@@ -91,7 +91,7 @@ $pdo = $db->getConnect();
                                             <?php if(isset($_SESSION['logged_name'])):?>
                                             <li><a href="#">Quản lý</a>
                                                 <ul class="submenu">
-                                                    <li><a href="#">Quản Lý nhân viên</a></li>
+                                                    <li><a href="quanlynv.php">Quản Lý nhân viên</a></li>
                                                     <li><a href="themnv.php">Thêm nhân viên</a></li>
                                                 </ul>
                                             </li>

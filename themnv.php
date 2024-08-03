@@ -124,8 +124,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $tuoi = $ngayHienTai->diff($ngaySinhDate)->y;
     
         // Kiểm tra tuổi
-        if ($tuoi < 18) {
-            $ngaysinhError = 'Tuổi của bạn phải lớn hơn 18';
+        if ($tuoi < 18 || $tuoi >100) {
+            $ngaysinhError = 'Tuổi của bạn phải lớn hơn 18 và nhỏ hơn 100';
         }
     }
 
@@ -170,6 +170,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $sdtError = 'Hãy nhập số điện thoại';
     } elseif (!preg_match("/^\d{12}$/", $cccd)) {
         $cccdError = 'Căn cước công dẫn phải là 12 số';
+    } elseif (BuuCuc::isCCCDExists($pdo, $cccd)) {
+        $cccdError = 'CCCD đã tồn tại';
     }
 
     if (empty($chucvu)) {
