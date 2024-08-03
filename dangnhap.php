@@ -37,7 +37,8 @@ require_once "class/KhachHang.php";
                 $_SESSION['logged_us'] = serialize($us);
                 $_SESSION['logged_role'] = $us->role;
                 $_SESSION['logged_name'] = $us->hoTen;
-                $_SESSION['logged_id'] = $us->idKH;
+                $_SESSION['logged_id'] = $us->idKH;            
+                header("Location: index.php");
                 // if ($_SESSION['logged_role'] == "1") {
                 //     header("Location: admin.php");
                 //     exit;

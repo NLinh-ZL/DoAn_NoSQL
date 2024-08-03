@@ -88,6 +88,7 @@ $pdo = $db->getConnect();
                                             <li><a href="index.php">Trang chủ</a></li>
                                             <li><a href="taodon.php">Tạo đơn</a></li>
                                             <li><a href="QuanLyDon.php">Quản lý Đơn</a></li>
+                                            <li><a href="QuanLyDon_NhanVien.php">Quản lý Đơn của NV</a></li>
                                             <li><a href="#">Giới thiệu</a></li>
                                             <?php if(isset($_SESSION['logged_name'])):?>
                                             <li><a href="#"><?= $_SESSION['logged_name']  ?></a>

@@ -36,9 +36,10 @@
 <?php
 session_start();
 require_once "class/Database.php";
+require "class/KhachHang.php";
 $db = new Database();
 $pdo = $db->getConnect();
-
+$kh = KhachHang::getUserById($pdo,$_SESSION['logged_id']);
 ?>
 
 <body>
@@ -399,26 +400,30 @@ $pdo = $db->getConnect();
 
                             <li class="nav-item topbar-user dropdown hidden-caret">
                                 <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
-                                    <div class="avatar-sm">
-                                        <img src="assets/img/profile.jpg" alt="..." class="avatar-img rounded-circle" />
-                                    </div>
-                                    <span class="profile-username">
-                                        <span class="op-7">Hi,</span>
-                                        <span class="fw-bold">Hizrian</span>
-                                    </span>
+                                    <?php if (isset($_SESSION['logged_name'])) : ?>
+                                        <span class="profile-username">
+                                            <span class="op-7">Hi,</span>
+                                            <span class="fw-bold"><?= $_SESSION['logged_name'] ?></span>
+                                        </span>
+
+                                    <?php endif; ?>
+
                                 </a>
                                 <ul class="dropdown-menu dropdown-user animated fadeIn">
                                     <div class="dropdown-user-scroll scrollbar-outer">
                                         <li>
                                             <div class="user-box">
-                                                <div class="avatar-lg">
-                                                    <img src="assets/img/profile.jpg" alt="image profile" class="avatar-img rounded" />
-                                                </div>
-                                                <div class="u-text">
-                                                    <h4>Hizrian</h4>
-                                                    <p class="text-muted">hello@example.com</p>
-                                                    <a href="profile.html" class="btn btn-xs btn-secondary btn-sm">View Profile</a>
-                                                </div>
+
+                                                <?php if (isset($_SESSION['logged_name'])) : ?>
+                                                    <div class="u-text">
+                                                        <h4><?= $_SESSION['logged_name'] ?></h4>
+                                                        <p class="text-muted"><?=  $kh['email']  ?></p>
+                                                        <a href="profile.html" class="btn btn-xs btn-secondary btn-sm">View Profile</a>
+                                                    </div>
+                                                <?php endif; ?>
+
+
+
                                             </div>
                                         </li>
                                         <li>
@@ -429,7 +434,7 @@ $pdo = $db->getConnect();
                                             <div class="dropdown-divider"></div>
                                             <a class="dropdown-item" href="#">Account Setting</a>
                                             <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item" href="#">Logout</a>
+                                            <a class="dropdown-item" href="dangxuat.php">Logout</a>
                                         </li>
                                     </div>
                                 </ul>

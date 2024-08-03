@@ -1,57 +1,122 @@
 <?php
 
-Class VanDon{
+class VanDon
+{
 
-    public static function getAllpage($database, $limit, $offset, $tinhtrang = null) {
+    public static function getAllpage($database, $limit, $offset, $tinhtrang = null, $idKhachHang)
+    {
         $collection = $database->VanDon; // Chọn bộ sưu tập 'VanDon'
-    
+
         if ($collection === null) {
             die("Bộ sưu tập không tồn tại: VanDon");
         }
-    
+
         // Điều kiện tìm kiếm
         $query = [];
         if ($tinhtrang !== null) {
             $query['tinhTrang'] = $tinhtrang;
         }
-    
+
+        $query['idKhachHang'] = (int)$idKhachHang;
+
+
         // Tìm dữ liệu với phân trang
         $options = [
             'limit' => $limit,
             'skip' => $offset,
             'sort' => ['ngayTao' => 1] // Sắp xếp theo ngày tạo giảm dần (hoặc bạn có thể thay đổi theo nhu cầu)
         ];
-    
+
         $cursor = $collection->find($query, $options); // Lấy dữ liệu từ bộ sưu tập
         $results = [];
-    
+
         foreach ($cursor as $document) {
             $results[] = $document;
         }
-    
+
         return $results;
     }
 
-    public static function countAll($database,$limit , $tinhtrang = null) {
+
+    public static function countAll($database, $limit, $tinhtrang = null, $idKhachHang)
+    {
         $collection = $database->VanDon; // Chọn bộ sưu tập 'VanDon'
-    
+
         if ($collection === null) {
             die("Bộ sưu tập không tồn tại: VanDon");
         }
-    
+
         // Điều kiện tìm kiếm
         $query = [];
         if ($tinhtrang !== null) {
             $query['tinhTrang'] = $tinhtrang;
         }
-    
+
+        $query['idKhachHang'] = (int)$idKhachHang;
         // Đếm tổng số phần tử với điều kiện lọc
         $count = $collection->countDocuments($query);
-    
+
         $total_pages = ceil($count / $limit);
 
         return $total_pages;
     }
+
+    public static function XacNhanVD_BuuCuc($database, $idVD, $trangthai, $idNhanVien, $idBC, $tenBC, $diachiBC)
+    {
+        $collection = $database->VanDon; // Chọn bộ sưu tập 'VanDon'
+
+        if ($collection === null) {
+            die("Bộ sưu tập không tồn tại: VanDon");
+        }
+
+        // Quy trình mới cần thêm
+        $quyTrinhMoi = [
+            'trangthai' => $trangthai,
+            'idNV' => $idNhanVien,
+            'idBC' => $idBC,
+            'tenBC' => $tenBC,
+            'diachiBC' => $diachiBC
+        ];
+
+        // Tìm và cập nhật vận đơn với idVD cụ thể
+        $result = $collection->updateOne(
+            ['idVD' => $idVD],
+            ['$push' => ['quyTrinhVC' => $quyTrinhMoi]]
+        );
+
+        // Kiểm tra kết quả cập nhật
+        if ($result->getModifiedCount() == 1) {
+            return "Thêm quy trình vận chuyển thành công!";
+        } else {
+            return "Thêm quy trình vận chuyển thất bại hoặc vận đơn không tồn tại!";
+        }
+    }
+
+    public static function getDonHangTrangThai($database,$idBuuCuc,$limit,$offset,$tinhtrang = null)
+    {
+        $collection = $database->VanDon;
+        // Truy vấn tìm các đơn hàng có trạng thái "Chờ xác nhận" trong quy trình vận chuyển
+        $query = [
+            'quyTrinhVC.0.trangthai' => $tinhtrang,
+            'quyTrinhVC.idBC' => $idBuuCuc
+        ];
+
+        $options = [
+            'limit' => $limit,
+            'skip' => $offset,
+            'projection' => ['_id' => 0] // Không lấy trường _id, có thể điều chỉnh theo nhu cầu
+        ];
+
+        $cursor = $collection->find($query, $options);
+        $results = [];
+
+        foreach ($cursor as $document) {
+            $results[] = $document;
+        }
+
+        return $results;
+    }
+    // -------------------------------------------------------------------------------------------------------------------------------------
     public static function xacDinhKieuVanChuyen($tinhGui, $tinhNhan)
     {
         // Định nghĩa các khu vực của Việt Nam
@@ -138,7 +203,7 @@ Class VanDon{
             $phiCuoiCung = $phiCoBan;
         }
 
-        return (int )$phiCuoiCung;
+        return (int)$phiCuoiCung;
     }
 
     public static function themDonHang($pdo, $idKHGui, $thoiGianHenLay, $hoTenNguoiNhan, $sdtNguoiNhan, $diaChiNguoiNhan, $thanhPho, $quan, $phuong, $duong, $thoiGianHenGiao, $loaiHangHoa, $items, $tinhChatHangHoaDacBiet, $nguoiTraCuoc, $cuoc, $tienThuHo, $loaiVanChuyen, $ghiChu, $quyTrinhVC)
@@ -209,4 +274,3 @@ Class VanDon{
         return $newId; // Giữ giá trị là kiểu số
     }
 }
-?>
