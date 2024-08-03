@@ -47,7 +47,7 @@ require_once "class/BuuCuc.php";
                     $_SESSION['logged_role'] = $us->role;
                     $_SESSION['logged_name'] = $us->hoTen;
                     $_SESSION['logged_id'] = $us->idNV;
-                    $_SESSION['logged_id'] = $us->chucvu;
+                    $_SESSION['logged_chucvu'] = $us->chucvu;
                 }
                 
                 // if ($_SESSION['logged_role'] == "1") {
