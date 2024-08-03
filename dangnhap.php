@@ -47,7 +47,7 @@ require_once "class/BuuCuc.php";
                     $_SESSION['logged_role'] = $us->role;
                     $_SESSION['logged_name'] = $us->hoTen;
                     $_SESSION['logged_id'] = $us->idNV;
-                    $_SESSION['logged_chucvu'] = $us->chucvu;
+                    $_SESSION['logged_chucvu'] = $us->chucVu;
                 }
                 
                 // if ($_SESSION['logged_role'] == "1") {
@@ -103,6 +103,9 @@ require_once "class/BuuCuc.php";
                                 <!-- Button -->
                                 <div class="col-lg-12">
                                     <button name="submit" class="submit-btn">Đăng nhập</button>
+                                </div>
+                                <div class="col-lg-12">
+                                    <a class="my-2 btn bg-success" href="dangky.php">Đăng ký</a>
                                 </div>
                             </div>
                         </form>	
