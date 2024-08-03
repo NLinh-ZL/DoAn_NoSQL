@@ -5,6 +5,7 @@ require_once "inc/header.php";
 <?php
 require_once "class/KhachHang.php";
 require_once "class/API.php";
+require_once "class/BuuCuc.php";
 
 $vietnamProvinces = [
     'An Giang', 'Bạc Liêu', 'Bắc Cạn', 'Bắc Giang', 'Bắc Ninh', 'Bình Dương',
@@ -37,6 +38,7 @@ $duongError = '';
 $sonhaError = '';
 $cccdError = '';
 $chucvuError = '';
+$buucucError = '';
 
 $hoten = '';
 $gioitinh = '';
@@ -53,6 +55,9 @@ $duong = '';
 $sonha = '';
 $cccd = '';
 $chucvu = '';
+$buucuc = '';
+
+$buuCucs = BuuCuc::getAllBuuCuc($pdo);
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $hoten = $_POST['hoten'];
@@ -70,6 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sonha = $_POST['sonha'];
     $cccd = $_POST['cccd'];
     $chucvu = $_POST['chucvu'];
+    $buucuc = $_POST['buucuc'];
 
     // Kiểm tra họ tên
     if (empty($hoten)) {
@@ -86,7 +92,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $emailError = 'Hãy nhập email';
     } elseif (!preg_match("/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/", $email)) {
         $emailError = 'Email không hợp lệ';
-    } elseif (KhachHang::isEmailExists($pdo, $email)) {
+    } elseif (BuuCuc::isEmailExists($pdo, $email)) {
         $emailError = 'Email đã tồn tại';
     }
 
@@ -107,6 +113,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Kiểm tra ngày sinh
     if (empty($ngaysinh)) {
         $ngaysinhError = 'Hãy nhập ngày sinh';
+    }else {
+        // Chuyển đổi ngày sinh từ chuỗi thành đối tượng DateTime
+        $ngaySinhDate = new DateTime($ngaysinh);
+        
+        // Lấy ngày hiện tại
+        $ngayHienTai = new DateTime();
+        
+        // Tính toán tuổi
+        $tuoi = $ngayHienTai->diff($ngaySinhDate)->y;
+    
+        // Kiểm tra tuổi
+        if ($tuoi < 18) {
+            $ngaysinhError = 'Tuổi của bạn phải lớn hơn 18';
+        }
     }
 
     // Kiểm tra số điện thoại
@@ -157,19 +177,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
 
-
     // Nếu không có lỗi nào, thêm khách hàng mới vào MongoDB
-    if (empty($hotenError) && empty($gioitinhError) && empty($emailError) && empty($passError) && empty($passcfError) && empty($ngaysinhError) && empty($sdtError) && empty($diachiError) && empty($thanhphoError) && empty($quanError) && empty($phuongError) && empty($duongError)) {
+    if (empty($cccdError) && empty($chucvuError) && empty($hotenError) && empty($gioitinhError) && empty($emailError) && empty($passError) && empty($passcfError) && empty($ngaysinhError) && empty($sdtError) && empty($diachiError) && empty($thanhphoError) && empty($quanError) && empty($phuongError) && empty($duongError)) {
         $hashed_pass = password_hash($pass, PASSWORD_DEFAULT);
 
         // Thêm khách hàng mới vào MongoDB
-        KhachHang::addKhachHang($pdo, $hoten, $gioitinh, $ngaysinh, [
+        BuuCuc::addNhanVien($pdo, $buucuc, $hoten, $gioitinh, $ngaysinh, [
             'diachi' => $diachi,
             'thanhpho' => $thanhpho,
             'quan' => $quan,
             'phuong' => $phuong,
             'duong' => $duong
-        ], $sdt, $email, $hashed_pass);
+        ], $sdt, $cccd, $email, $chucvu, $hashed_pass);
 
         header("Location: dangnhap.php");
         exit;
@@ -303,6 +322,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         <span class="text-danger"><?= $cccdError ?></span>
                                     </div>
                                 </div>
+
+                                <div class="col-lg-6 col-md-6">
+                                    <div class="select-items">
+                                        <label class="form-label my-1" style="font-size: 16px; display: block;">Bưu cục:</label>
+                                        <select id="buucuc" name="buucuc" size="5">
+                                            <option value="" selected>Chọn bưu cục</option>
+                                            <?php foreach ($buuCucs as $buuCuc) : ?>
+                                                <option value="<?= $buuCuc['idBC'] ?>" <?= $buuCuc['idBC'] === $buucuc ? 'selected' : '' ?> ><?= $buuCuc['tenBC'] ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <span class="text-danger"><?= $buucucError ?></span>
+                                    </div>
+                                </div>
+
                                 <div class="col-lg-6 col-md-6">
                                     <div class="select-items">
                                         <label class="form-label my-1" style="font-size: 16px; display: block;">Chức vụ:</label>
@@ -311,6 +344,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             <option value="Quản lý" <?= isset($chucvu) && $chucvu == 'Quản lý' ? 'selected' : '' ?>>Quản lý</option>
                                             <option value="Nhân viên" <?= isset($chucvu) && $chucvu == 'Nhân viên' ? 'selected' : '' ?>>Nhân viên</option>
                                             <option value="Shipper" <?= isset($chucvu) && $chucvu == 'Shipper' ? 'selected' : '' ?>>Shipper</option>
+                                            <option value="Nhân viên kho" <?= isset($chucvu) && $chucvu == 'Nhân viên kho' ? 'selected' : '' ?>>Nhân viên kho</option>
                                         </select>
                                         <span class="text-danger"><?= $chucvuError ?></span>
                                     </div>
@@ -332,7 +366,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                                 <!-- Button -->
                                 <div class="col-lg-12">
-                                    <button name="submit" class="submit-btn">Đăng ký</button>
+                                    <button name="submit" class="submit-btn">Thêm nhân viên</button>
                                 </div>
                             </div>
                         </form>

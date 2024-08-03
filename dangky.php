@@ -101,6 +101,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Kiểm tra ngày sinh
     if (empty($ngaysinh)) {
         $ngaysinhError = 'Hãy nhập ngày sinh';
+    }else {
+        // Chuyển đổi ngày sinh từ chuỗi thành đối tượng DateTime
+        $ngaySinhDate = new DateTime($ngaysinh);
+        
+        // Lấy ngày hiện tại
+        $ngayHienTai = new DateTime();
+        
+        // Tính toán tuổi
+        $tuoi = $ngayHienTai->diff($ngaySinhDate)->y;
+    
+        // Kiểm tra tuổi
+        if ($tuoi < 18) {
+            $ngaysinhError = 'Tuổi của bạn phải lớn hơn 16';
+        }
     }
 
     // Kiểm tra số điện thoại
