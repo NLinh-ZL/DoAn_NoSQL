@@ -245,9 +245,10 @@ class BuuCuc
     
     
 
+    
     public static function getNhanVienById($pdo, $idNV)
     {
-        $collection = $pdo->VanDon;
+        $collection = $pdo->BuuCuc;
         // Truy vấn để tìm nhân viên với idNV cụ thể
         $query = [
             'nhanVien.idNV' => (int)$idNV
@@ -275,5 +276,29 @@ class BuuCuc
         } else {
             return null; // Không tìm thấy nhân viên
         }
+    }
+
+    // Hàm lấy tất cả nhân viên giao hàng
+    public static function getAllDeliveryStaff($pdo)
+    {
+        $collection = $pdo->BuuCuc;
+        $cursor = $collection->find(
+            [], // Tìm tất cả các tài liệu trong BuuCuc
+            [
+                'projection' => ['nhanVien' => 1], // Chỉ lấy trường nhanVien
+            ]
+        );
+
+        $deliveryStaff = [];
+
+        foreach ($cursor as $document) {
+            foreach ($document['nhanVien'] as $staff) {
+                if ($staff['chucVu'] == 'Nhân viên giao hàng') {
+                    $deliveryStaff[] = $staff;
+                }
+            }
+        }
+
+        return $deliveryStaff;
     }
 }

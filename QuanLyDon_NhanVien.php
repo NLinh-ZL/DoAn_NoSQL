@@ -2,11 +2,13 @@
 require_once "inc/header1.php";
 require_once "class/Database.php";
 require "class/VanDon.php";
+require "class/BuuCuc.php";
 //Tạo số trang
 $page = isset($_GET['page']) ? $_GET['page'] : 1;
 $limit = 10;
 // $offset = ($page - 1) * $limit;
 
+$NhanVienDangNhap = BuuCuc::getNhanVienById($pdo,  isset( $_SESSION['logged_id'])?  $_SESSION['logged_id']:null);
 // $db = new Database();
 // $database = $db->getConnect();
 $collection = $pdo->VanDon; // Chọn bộ sưu tập 'VanDon'
@@ -14,7 +16,6 @@ $collection = $pdo->VanDon; // Chọn bộ sưu tập 'VanDon'
 // $idKhachHang = isset($_SESSION['logged_iduser']) ? $_SESSION['logged_iduser']: 0;
 if (isset($_SESSION['logged_id'])) {
     $idKhachHang = $_SESSION['logged_id'];
-
 }
 // Kiểm tra bộ sưu tập
 if ($collection === null) {
@@ -25,10 +26,10 @@ if ($collection === null) {
 
 $active = isset($_GET['active']) && $_GET['active'] !== '' ? $_GET['active'] : null;
 
-$total_pages_TongDon = VanDon::countAll($pdo,$limit,null, $idKhachHang);
-$total_pages_GiaoThanhCong = VanDon::countAll($pdo,$limit,'Giao hàng thành công', $idKhachHang);
-$total_pages_HuyGiao = VanDon::countAll($pdo,$limit,'Hủy giao', $idKhachHang);
-$total_pages_DangGiao = VanDon::countAll($pdo,$limit,'Đang giao', $idKhachHang);
+$total_pages_TongDon = VanDon::countAll($pdo, $limit, null, $idKhachHang);
+$total_pages_GiaoThanhCong = VanDon::countAll($pdo, $limit, 'Giao hàng thành công', $idKhachHang);
+$total_pages_HuyGiao = VanDon::countAll($pdo, $limit, 'Hủy giao', $idKhachHang);
+$total_pages_DangGiao = VanDon::countAll($pdo, $limit, 'Đang giao', $idKhachHang);
 
 // $totalDocuments = VanDon::countTotalDocuments($pdo);
 
@@ -42,6 +43,20 @@ $customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHan
 // $GiaoThanhCong = VanDon::getAllpage($pdo, $limit, $offset, 'Giao hàng thành công');
 // $HuyGiao = VanDon::getAllpage($pdo, $limit, $offset, 'Hủy giao');
 // $DangGiao = VanDon::getAllpage($pdo, $limit, $offset, 'Đang giao');
+// Lấy nhân viên giao hàng
+$deliveryStaff = BuuCuc::getAllDeliveryStaff($pdo);
+
+$Nhanvien = isset($_GET['idNhanVien']) ? BuuCuc::getNhanVienById($pdo, $_GET['idNhanVien']) : null;
+
+if (isset($_GET['action']) && isset($_GET['idVD']) && isset($_GET['idNhanVien'])) {
+    $action = $_GET['action'];
+    $idVD = $_GET['idVD'];
+
+
+    if ($action == 'xacnhan') {
+        VanDon::XacNhanVD_BuuCuc($pdo, $idVD, 'Chờ lấy', $idNhanVien, $Nhanvien['idBC'], $Nhanvien['tenBC'], $Nhanvien['diaChi']);
+    }
+}
 ?>
 <link href="./demo.css" rel="stylesheet" />
 
@@ -140,18 +155,30 @@ $customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHan
                     <div class="card-body">
                         <ul class="nav nav-pills nav-secondary" style=" background: #f8f8fa; margin-bottom:15px" id="pills-tab" role="tablist">
                             <li class="nav-itemw flex-fill text-center">
-                                <a class="nav-link <?= ($active == null || $active == 'TongDon')  ? 'active' : '' ?>" style="padding: 20px; margin: 0px;  " id="pills-home-tab" data-bs-toggle="pill" href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true">
+                                <a class="nav-link <?= ($active == null || $active == 'ChoXacNhan')  ? 'active' : '' ?>" style="padding: 20px; margin: 0px;  " id="pills-home-tab" data-bs-toggle="pill" href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true">
                                     <h5 style="color: #000;">
                                         <svg fill="none" style="margin-bottom:2px;" height="21" viewBox="0 0 18 21" width="18" xmlns="http://www.w3.org/2000/svg">
                                             <path clip-rule="evenodd" d="M7 0.5H11C12.1046 0.5 13 1.39543 13 2.5C13 3.60457 12.1046 4.5 11 4.5H7C5.89543 4.5 5 3.60457 5 2.5C5 1.39543 5.89543 0.5 7 0.5ZM3.50733 2.53003C3.50247 2.60272 3.5 2.67607 3.5 2.74999C3.5 4.54491 4.95507 5.99999 6.75 5.99999H11.25C13.0449 5.99999 14.5 4.54491 14.5 2.74999C14.5 2.67607 14.4975 2.60272 14.4927 2.53003C16.4694 2.77282 18 4.45766 18 6.49999V16.5C18 18.7091 16.2091 20.5 14 20.5H4C1.79086 20.5 0 18.7091 0 16.5V6.49999C0 4.45766 1.53062 2.77282 3.50733 2.53003ZM4.25 8.5C4.25 8.08579 4.58579 7.75 5 7.75H13C13.4142 7.75 13.75 8.08579 13.75 8.5C13.75 8.91421 13.4142 9.25 13 9.25H5C4.58579 9.25 4.25 8.91421 4.25 8.5ZM5 11.75C4.58579 11.75 4.25 12.0858 4.25 12.5C4.25 12.9142 4.58579 13.25 5 13.25H13C13.4142 13.25 13.75 12.9142 13.75 12.5C13.75 12.0858 13.4142 11.75 13 11.75H5ZM4.25 16.5C4.25 16.0858 4.58579 15.75 5 15.75H9C9.41421 15.75 9.75 16.0858 9.75 16.5C9.75 16.9142 9.41421 17.25 9 17.25H5C4.58579 17.25 4.25 16.9142 4.25 16.5Z" fill="#CECECE" fill-rule="evenodd"></path>
                                         </svg>
-                                        Tổng số đơn
+                                        Đơn hàng cần xác nhận
                                     </h5>
-                                    <h6 style="color: #000;"><?= ($customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHang])) ?> đơn hàng</h6>
+                                    <h6 style="color: #000;"><?= ($customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHang, 'quyTrinhVC.trangthai' => 'Chờ xác nhận'])) ?> đơn hàng</h6>
                                 </a>
                             </li>
                             <li class="nav-itemw flex-fill text-center">
-                                <a class="nav-link <?= $active === 'GiaoThanhCong'  ? 'active' : '' ?>" style="padding: 20px; margin: 0px;" id="pills-profile-tab"   data-bs-toggle="pill" href="#pills-profile" role="tab" aria-controls="pills-profile" aria-selected="false">
+                                <a class="nav-link <?= $active === 'DangLay'  ? 'active' : '' ?>" style="padding: 20px;margin: 0px;" id="pills-contact-tab" data-bs-toggle="pill" href="#pills-contact" role="tab" aria-controls="pills-contact" aria-selected="false">
+                                    <h5 style="color: #000;">
+                                        <svg fill="none" style="margin-bottom:2px;" height="22" viewBox="0 0 21 22" width="21" xmlns="http://www.w3.org/2000/svg">
+                                            <path clip-rule="evenodd" d="M21 10.4999C21 16.0227 16.5228 20.4999 11 20.4999C10.4477 20.4999 10 20.0522 10 19.4999V16.4999C10 15.3953 9.10457 14.4999 8 14.4999H3C1.89543 14.4999 1 13.6044 1 12.4999V10.4999C1 4.97703 5.47715 0.499878 11 0.499878C16.5228 0.499878 21 4.97703 21 10.4999ZM11 3.74988C10.5858 3.74988 10.25 4.08566 10.25 4.49988V8.64526C9.51704 8.94195 9 9.66053 9 10.4999C9 11.6044 9.89543 12.4999 11 12.4999C11.2934 12.4999 11.572 12.4367 11.8231 12.3232C11.8588 12.3981 11.9077 12.4682 11.9697 12.5302L13.4697 14.0302C13.7626 14.3231 14.2374 14.3231 14.5303 14.0302C14.8232 13.7373 14.8232 13.2624 14.5303 12.9695L13.0303 11.4695C12.9683 11.4076 12.8982 11.3587 12.8233 11.3229C12.9368 11.0719 13 10.7933 13 10.4999C13 9.66053 12.483 8.94195 11.75 8.64526V4.49988C11.75 4.08566 11.4142 3.74988 11 3.74988ZM0.25 20.4999C0.25 20.0857 0.585786 19.7499 1 19.7499H7C7.41421 19.7499 7.75 20.0857 7.75 20.4999C7.75 20.9141 7.41421 21.2499 7 21.2499H1C0.585786 21.2499 0.25 20.9141 0.25 20.4999ZM1 16.7499C0.585786 16.7499 0.25 17.0857 0.25 17.4999C0.25 17.9141 0.585786 18.2499 1 18.2499H5C5.41421 18.2499 5.75 17.9141 5.75 17.4999C5.75 17.0857 5.41421 16.7499 5 16.7499H1Z" fill="#CECECE" fill-rule="evenodd"></path>
+                                        </svg>
+
+                                        Đang Lấy
+                                    </h5>
+                                    <h6 style="color: #000;"><?= ($customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHang, 'quyTrinhVC.trangthai' => 'Đang lấy'])) ?> đơn hàng</h6>
+                                </a>
+                            </li>
+                            <li class="nav-itemw flex-fill text-center">
+                                <a class="nav-link <?= $active === 'LayThanhCong'  ? 'active' : '' ?>" style="padding: 20px; margin: 0px;" id="pills-profile-tab" data-bs-toggle="pill" href="#pills-profile" role="tab" aria-controls="pills-profile" aria-selected="false">
                                     <h5 style="color: #000;">
                                         <svg fill="none" style="margin-bottom:2px;" height="25" viewBox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M17.6 5.81L11.95 2.77C11.35 2.45 10.64 2.45 10.04 2.77L4.39998 5.81C3.98998 6.04 3.72998 6.48 3.72998 6.96C3.72998 7.45 3.97998 7.89 4.39998 8.11L10.05 11.15C10.35 11.31 10.68 11.39 11 11.39C11.32 11.39 11.66 11.31 11.95 11.15L17.6 8.11C18.01 7.89 18.27 7.45 18.27 6.96C18.27 6.48 18.01 6.04 17.6 5.81Z" fill="#CECECE"></path>
@@ -159,24 +186,13 @@ $customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHan
                                             <path d="M20.0001 10.74V13.2C19.5201 13.06 19.0101 13 18.5001 13C17.1401 13 15.8101 13.47 14.7601 14.31C13.3201 15.44 12.5001 17.15 12.5001 19C12.5001 19.49 12.5601 19.98 12.6901 20.45C12.5401 20.43 12.3901 20.37 12.2501 20.28C11.8701 20.05 11.6401 19.64 11.6401 19.19V14.23C11.6401 13.37 12.1201 12.6 12.8801 12.21L18.1301 9.59C18.5401 9.38 19.0001 9.41 19.3901 9.64C19.7701 9.88 20.0001 10.29 20.0001 10.74Z" fill="#CECECE"></path>
                                             <path d="M21.98 16.17C21.16 15.16 19.91 14.52 18.5 14.52C17.44 14.52 16.46 14.89 15.69 15.51C14.65 16.33 14 17.6 14 19.02C14 19.86 14.24 20.66 14.65 21.34C14.92 21.79 15.26 22.18 15.66 22.5H15.67C16.44 23.14 17.43 23.52 18.5 23.52C19.64 23.52 20.67 23.1 21.46 22.4C21.81 22.1 22.11 21.74 22.35 21.34C22.76 20.66 23 19.86 23 19.02C23 17.94 22.62 16.94 21.98 16.17ZM20.76 18.46L18.36 20.68C18.22 20.81 18.03 20.88 17.85 20.88C17.66 20.88 17.47 20.81 17.32 20.66L16.21 19.55C15.92 19.26 15.92 18.78 16.21 18.49C16.5 18.2 16.98 18.2 17.27 18.49L17.87 19.09L19.74 17.36C20.04 17.08 20.52 17.1 20.8 17.4C21.09 17.71 21.07 18.18 20.76 18.46Z" fill="#CECECE"></path>
                                         </svg>
-                                        
-                                        Giao thành công
-                                    </h5>
-                                    <h6 style="color: #000;"><?= ($customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHang, 'tinhTrang' => 'Giao hàng thành công'])) ?> đơn hàng</h6>
-                                </a>
-                            </li>
-                            <li class="nav-itemw flex-fill text-center">
-                                <a class="nav-link <?= $active === 'DangGiao'  ? 'active' : '' ?>" style="padding: 20px;margin: 0px;" id="pills-contact-tab" data-bs-toggle="pill" href="#pills-contact" role="tab" aria-controls="pills-contact" aria-selected="false">
-                                    <h5 style="color: #000;">
-                                        <svg fill="none" style="margin-bottom:2px;" height="22" viewBox="0 0 21 22" width="21" xmlns="http://www.w3.org/2000/svg">
-                                            <path clip-rule="evenodd" d="M21 10.4999C21 16.0227 16.5228 20.4999 11 20.4999C10.4477 20.4999 10 20.0522 10 19.4999V16.4999C10 15.3953 9.10457 14.4999 8 14.4999H3C1.89543 14.4999 1 13.6044 1 12.4999V10.4999C1 4.97703 5.47715 0.499878 11 0.499878C16.5228 0.499878 21 4.97703 21 10.4999ZM11 3.74988C10.5858 3.74988 10.25 4.08566 10.25 4.49988V8.64526C9.51704 8.94195 9 9.66053 9 10.4999C9 11.6044 9.89543 12.4999 11 12.4999C11.2934 12.4999 11.572 12.4367 11.8231 12.3232C11.8588 12.3981 11.9077 12.4682 11.9697 12.5302L13.4697 14.0302C13.7626 14.3231 14.2374 14.3231 14.5303 14.0302C14.8232 13.7373 14.8232 13.2624 14.5303 12.9695L13.0303 11.4695C12.9683 11.4076 12.8982 11.3587 12.8233 11.3229C12.9368 11.0719 13 10.7933 13 10.4999C13 9.66053 12.483 8.94195 11.75 8.64526V4.49988C11.75 4.08566 11.4142 3.74988 11 3.74988ZM0.25 20.4999C0.25 20.0857 0.585786 19.7499 1 19.7499H7C7.41421 19.7499 7.75 20.0857 7.75 20.4999C7.75 20.9141 7.41421 21.2499 7 21.2499H1C0.585786 21.2499 0.25 20.9141 0.25 20.4999ZM1 16.7499C0.585786 16.7499 0.25 17.0857 0.25 17.4999C0.25 17.9141 0.585786 18.2499 1 18.2499H5C5.41421 18.2499 5.75 17.9141 5.75 17.4999C5.75 17.0857 5.41421 16.7499 5 16.7499H1Z" fill="#CECECE" fill-rule="evenodd"></path>
-                                        </svg>
 
-                                        Đang Giao
+                                        Lấy thành công
                                     </h5>
-                                    <h6 style="color: #000;"><?= ($customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHang, 'tinhTrang' => 'Đang giao'])) ?> đơn hàng</h6>
+                                    <h6 style="color: #000;"><?= ($customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHang, 'quyTrinhVC.trangthai' => 'Lấy thành công'])) ?> đơn hàng</h6>
                                 </a>
                             </li>
+
                             <li class="nav-itemw flex-fill text-center">
                                 <a class="nav-link <?= $active === 'HuyGiao'  ? 'active' : '' ?>" style="padding: 20px;margin: 0px;" id="pills-huy-tab" data-bs-toggle="pill" href="#pills-huy" role="tab" aria-controls="pills-huy" aria-selected="false">
                                     <h5 style="color: #000;">
@@ -189,7 +205,7 @@ $customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHan
 
                                         Hủy Giao
                                     </h5>
-                                    <h6 style="color: #000;"><?= ($customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHang, 'tinhTrang' => 'Hủy giao'])) ?> đơn hàng</h6>
+                                    <h6 style="color: #000;"><?= ($customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHang, 'quyTrinhVC.trangthai' => 'Hủy giao'])) ?> đơn hàng</h6>
                                 </a>
                             </li>
 
@@ -197,7 +213,8 @@ $customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHan
 
                         </ul>
                         <div class="tab-content mt-2 mb-3" id="pills-tabContent" style="border-top: 3px solid #dc3545;">
-                            <div class="tab-pane fade  <?= ($active == null || $active == 'TongDon')  ? 'show active' : '' ; $page = $active !== 'TongDon' ? 1 : ($_GET['page']); ?> " id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+                            <div class="tab-pane fade  <?= ($active == null || $active == 'ChoXacNhan')  ? 'show active' : '';
+                                                        $page = $active !== 'ChoXacNhan' ? 1 : ($_GET['page']); ?> " id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
 
                                 <table class="table">
                                     <thead>
@@ -207,18 +224,37 @@ $customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHan
 
                                             <th scope="col">Ngày tạo</th>
                                             <th scope="col">Tên người nhận</th>
-                                            <th scope="col">Ngày nhận</th>
+
                                             <th scope="col">Loại hàng</th>
                                             <th scope="col">Khối lượng</th>
-                                            <th scope="col">Tình trạng</th>
+                                        
+                                            <th scope="col">
+
+                                                <div class="btn-group dropdown">
+                                                    <button class="btn  dropdown-toggle" type="button" data-bs-toggle="dropdown" style="color:#dc3545 ;font-size: .95rem; text-transform: uppercase; letter-spacing: 1px; padding: 12px 24px !important; border-bottom-width: 1px; font-weight: 600;">
+                                                        <?= isset($Nhanvien) && isset($_GET['idNhanVien']) ? $Nhanvien['hoTen'] : ' Nhân viên giao ' ?>
+                                                    </button>
+                                                    <ul class="dropdown-menu" role="menu">
+                                                        <li>
+                                                            <a class="dropdown-item" href="QuanLyDon_NhanVien.php" style="font-size: .95rem; text-transform: uppercase; letter-spacing: 1px; padding: 12px 24px !important; border-bottom-width: 1px; font-weight: 600;">bỏ chọn</a>
+
+                                                            <?php foreach ($deliveryStaff as $Staff) : ?>
+                                                                <a class="dropdown-item" href="QuanLyDon_NhanVien.php?idNhanVien=<?= $Staff['idNV'] ?>" style="font-size: .95rem; text-transform: uppercase; letter-spacing: 1px; padding: 12px 24px !important; border-bottom-width: 1px; font-weight: 600;"><?= $Staff['hoTen'] ?></a>
+                                                            <?php endforeach; ?>
+
+
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <?php
                                         $STT = 1;
                                         $offset = ($page - 1) * $limit;
-                                        $TongDon = VanDon::getAllpage($pdo, $limit, $offset,null, $idKhachHang);
-                                        foreach ($TongDon as $order) :
+                                        $ChoXacNhan = VanDon::getDonHangTrangThai($pdo,$NhanVienDangNhap['idBC'], $limit, $offset, 'Chờ xác nhận');
+                                        foreach ($ChoXacNhan as $order) :
                                             $tongKhoiLuong = 0;
                                             foreach ($order['hangHoa'] as $hang) {
                                                 $tongKhoiLuong += $hang['trongLuong'];
@@ -230,10 +266,17 @@ $customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHan
 
                                                 <td><?= $order['ngayTao']->toDateTime()->format('Y-m-d H:i:s') ?></td>
                                                 <td><?= $order['nguoiNhan']['hoTen'] ?></td>
-                                                <td><?= $order['thoiGianHenGiao'] ?></td>
+                              
                                                 <td><?= $order['loaiHang'] ?></td>
                                                 <td><?= $tongKhoiLuong ?> kg</td>
-                                                <td><?= $order['tinhTrang'] ?></td>
+                                                <td><a <?= !isset($_GET['idNhanVien']) ? 'class="disabled"':'' ?>  href="QuanLyDon_NhanVien.php?action=xacnhan&idNhanVien=<?=$Nhanvien['idNV']?>">
+                                                        <button class="btn btn-success <?= !isset($_GET['idNhanVien']) ? 'disabled':'' ?>">
+                                                            <span class="btn-label  ">
+                                                                <i class="fa fa-check "></i>
+                                                            </span>
+
+                                                        </button>
+                                                    </a></td>
                                             </tr>
                                         <?php endforeach; ?>
                                     </tbody>
@@ -241,20 +284,21 @@ $customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHan
                                 <nav aria-label="Page navigation example">
                                     <ul class="pagination justify-content-end">
                                         <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
-                                            <a class="page-link" href="QuanLyDon.php?page=<?= $page - 1 ?>&active=TongDon">Previous</a>
+                                            <a class="page-link" href="QuanLyDon.php?page=<?= $page - 1 ?>&active=ChoXacNhan">Previous</a>
                                         </li>
                                         <?php for ($i = 1; $i <= $total_pages_TongDon; $i++) : ?>
                                             <li class="page-item  <?= $i == $page ? 'active' : '' ?>">
-                                                <a class="page-link" href="QuanLyDon.php?page=<?= $i ?>&active=TongDon"><?= $i ?></a>
+                                                <a class="page-link" href="QuanLyDon.php?page=<?= $i ?>&active=ChoXacNhan"><?= $i ?></a>
                                             </li>
                                         <?php endfor; ?>
                                         <li class="page-item <?= $page >= $total_pages_TongDon ? 'disabled' : '' ?>">
-                                            <a class="page-link" href="QuanLyDon.php?page=<?= $page + 1 ?>&active=TongDon">Next</a>
+                                            <a class="page-link" href="QuanLyDon.php?page=<?= $page + 1 ?>&active=ChoXacNhan">Next</a>
                                         </li>
                                     </ul>
                                 </nav>
                             </div>
-                            <div class="tab-pane fade <?= $active === 'GiaoThanhCong'  ? 'show active' : '' ; $page = $active !== 'GiaoThanhCong' ? 1 : ($_GET['page'] ); ?> " id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+                            <div class="tab-pane fade  <?= $active === 'DangGiao'  ? 'show active' : '';
+                                                        $page = $active !== 'DangGiao' ? 1 : ($_GET['page']); ?>" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">
                                 <table class="table">
                                     <thead>
                                         <tr>
@@ -273,64 +317,8 @@ $customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHan
                                         <?php
                                         $STT = 1;
                                         $offset = ($page - 1) * $limit;
-                                        $GiaoThanhCong = VanDon::getAllpage($pdo, $limit, $offset, 'Giao hàng thành công', $idKhachHang);
-                                        foreach ($GiaoThanhCong as $order) :
-                                            $tongKhoiLuong = 0;
-                                            foreach ($order['hangHoa'] as $hang) {
-                                                $tongKhoiLuong += $hang['trongLuong'];
-                                            }
-                                        ?>
-                                            <tr>
-                                                <th scope="row"><?= $STT++ ?></th>
-                                                <td><?= $order['idVD'] ?></td>
-
-                                                <td><?= $order['ngayTao']->toDateTime()->format('Y-m-d H:i:s') ?></td>
-                                                <td><?= $order['nguoiNhan']['hoTen'] ?></td>
-                                                <td><?= $order['thoiGianHenGiao'] ?></td>
-                                                <td><?= $order['loaiHang'] ?></td>
-                                                <td><?= $tongKhoiLuong ?> kg</td>
-                                                <td><?= $order['tinhTrang'] ?></td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                                <nav aria-label="Page navigation example">
-                                    <ul class="pagination justify-content-end">
-                                        <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
-                                            <a class="page-link" href="QuanLyDon.php?page=<?= $page - 1 ?>&active=GiaoThanhCong">Previous</a>
-                                        </li>
-                                        <?php for ($i = 1; $i <= $total_pages_GiaoThanhCong; $i++) : ?>
-                                            <li class="page-item  <?= $i == $page ? 'active' : '' ?>">
-                                                <a class="page-link" href="QuanLyDon.php?page=<?= $i ?>&active=GiaoThanhCong"><?= $i ?></a>
-                                            </li>
-                                        <?php endfor; ?>
-                                        <li class="page-item <?= $page >= $total_pages_GiaoThanhCong ? 'disabled' : '' ?>">
-                                            <a class="page-link" href="QuanLyDon.php?page=<?= $page + 1 ?>&active=GiaoThanhCong">Next</a>
-                                        </li>
-                                    </ul>
-                                </nav>
-                            </div>
-                            <div class="tab-pane fade  <?= $active === 'DangGiao'  ? 'show active' : ''; $page = $active !== 'DangGiao' ? 1 : ($_GET['page'] ); ?>" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">STT</th>
-                                            <th scope="col">Mã vận đơn</th>
-
-                                            <th scope="col">Ngày tạo</th>
-                                            <th scope="col">Tên người nhận</th>
-                                            <th scope="col">Ngày nhận</th>
-                                            <th scope="col">Loại hàng</th>
-                                            <th scope="col">Khối lượng</th>
-                                            <th scope="col">Tình trạng</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php
-                                        $STT = 1;
-                                        $offset = ($page - 1) * $limit;
-                                        $DangGiao = VanDon::getAllpage($pdo, $limit, $offset, 'Đang giao', $idKhachHang);
-                                        foreach ($DangGiao as $order) :
+                                        $DangLay = VanDon::getDonHangTrangThai($pdo, $limit, $offset, 'Đang lấy');
+                                        foreach ($DangLay as $order) :
                                             $tongKhoiLuong = 0;
                                             foreach ($order['hangHoa'] as $hang) {
                                                 $tongKhoiLuong += $hang['trongLuong'];
@@ -366,7 +354,66 @@ $customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHan
                                     </ul>
                                 </nav>
                             </div>
-                            <div class="tab-pane fade  <?= $active === 'HuyGiao'  ? 'show active' : ''; $page = $active !== 'HuyGiao' ? 1 : ($_GET['page'] ); ?>" id="pills-huy" role="tabpanel" aria-labelledby="pills-huy-tab">
+                            <div class="tab-pane fade <?= $active === 'GiaoThanhCong'  ? 'show active' : '';
+                                                        $page = $active !== 'GiaoThanhCong' ? 1 : ($_GET['page']); ?> " id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">STT</th>
+                                            <th scope="col">Mã vận đơn</th>
+
+                                            <th scope="col">Ngày tạo</th>
+                                            <th scope="col">Tên người nhận</th>
+                                            <th scope="col">Ngày nhận</th>
+                                            <th scope="col">Loại hàng</th>
+                                            <th scope="col">Khối lượng</th>
+                                            <th scope="col">Tình trạng</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        $STT = 1;
+                                        $offset = ($page - 1) * $limit;
+                                        $LayThanhCong = VanDon::getDonHangTrangThai($pdo, $limit, $offset, 'Lấy thành công');
+                                        foreach ($LayThanhCong as $order) :
+                                            $tongKhoiLuong = 0;
+                                            foreach ($order['hangHoa'] as $hang) {
+                                                $tongKhoiLuong += $hang['trongLuong'];
+                                            }
+                                        ?>
+                                            <tr>
+                                                <th scope="row"><?= $STT++ ?></th>
+                                                <td><?= $order['idVD'] ?></td>
+
+                                                <td><?= $order['ngayTao']->toDateTime()->format('Y-m-d H:i:s') ?></td>
+                                                <td><?= $order['nguoiNhan']['hoTen'] ?></td>
+                                                <td><?= $order['thoiGianHenGiao'] ?></td>
+                                                <td><?= $order['loaiHang'] ?></td>
+                                                <td><?= $tongKhoiLuong ?> kg</td>
+                                                <td><?= $order['tinhTrang'] ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                                <nav aria-label="Page navigation example">
+                                    <ul class="pagination justify-content-end">
+                                        <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
+                                            <a class="page-link" href="QuanLyDon.php?page=<?= $page - 1 ?>&active=GiaoThanhCong">Previous</a>
+                                        </li>
+                                        <?php for ($i = 1; $i <= $total_pages_GiaoThanhCong; $i++) : ?>
+                                            <li class="page-item  <?= $i == $page ? 'active' : '' ?>">
+                                                <a class="page-link" href="QuanLyDon.php?page=<?= $i ?>&active=GiaoThanhCong"><?= $i ?></a>
+                                            </li>
+                                        <?php endfor; ?>
+                                        <li class="page-item <?= $page >= $total_pages_GiaoThanhCong ? 'disabled' : '' ?>">
+                                            <a class="page-link" href="QuanLyDon.php?page=<?= $page + 1 ?>&active=GiaoThanhCong">Next</a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+
+                            <div class="tab-pane fade  <?= $active === 'HuyGiao'  ? 'show active' : '';
+                                                        $page = $active !== 'HuyGiao' ? 1 : ($_GET['page']); ?>" id="pills-huy" role="tabpanel" aria-labelledby="pills-huy-tab">
 
                                 <table class="table">
                                     <thead>
@@ -386,8 +433,8 @@ $customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHan
                                         <?php
                                         $STT = 1;
                                         $offset = ($page - 1) * $limit;
-                                        $HuyGiao = VanDon::getAllpage($pdo, $limit, $offset, 'Hủy giao', $idKhachHang);
-                                        foreach ($HuyGiao as $order) :
+                                        $Huygiao = VanDon::getDonHangTrangThai($pdo, $limit, $offset, 'Lấy thành công');
+                                        foreach ($Huygiao as $order) :
                                             $tongKhoiLuong = 0;
                                             foreach ($order['hangHoa'] as $hang) {
                                                 $tongKhoiLuong += $hang['trongLuong'];
