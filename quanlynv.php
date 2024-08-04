@@ -51,6 +51,16 @@ echo $totalPages;
         margin: 5px 0;
         padding: 0;
     }
+
+    .btn-disabled {
+        cursor: not-allowed;
+        opacity: 0.65;
+    }
+
+    .btn-disabled:hover {
+        background-color: #6c757d;
+        color: #fff;
+    }
 </style>
 
 <section class="contact-section" style="background-color: #F8F8FF">
@@ -92,14 +102,14 @@ echo $totalPages;
                                                     <option value="" <?= isset($sortColumn) && $sortColumn == '' ? 'selected' : '' ?>>Cột sắp xếp</option>
                                                     <option value="idNV" <?= isset($sortColumn) && $sortColumn == 'idNV' ? 'selected' : '' ?>>ID</option>
                                                     <option value="hoTen" <?= isset($sortColumn) && $sortColumn == 'hoTen' ? 'selected' : '' ?>>Họ tên</option>
-                                                    <option value="desc" <?= isset($sortColumn) && $sortColumn == 'chucVu' ? 'selected' : '' ?>>Chức vụ</option>
+                                                    <option value="chucVu" <?= isset($sortColumn) && $sortColumn == 'chucVu' ? 'selected' : '' ?>>Chức vụ</option>
                                                 </select>
                                             </div>
                                             <div class="col-6">
                                                 <select name="sortOrder" id="sortOrder" class="form-select">
                                                     <option value="" <?= isset($sortOrder) && $sortOrder == '' ? 'selected' : '' ?>>Kiểu sắp xếp</option>
                                                     <option value="asc" <?= isset($sortOrder) && $sortOrder == 'asc' ? 'selected' : '' ?>>Tăng</option>
-                                                    <option value="chucVu" <?= isset($sortOrder) && $sortOrder == 'desc' ? 'selected' : '' ?>>Giảm</option>
+                                                    <option value="desc" <?= isset($sortOrder) && $sortOrder == 'desc' ? 'selected' : '' ?>>Giảm</option>
                                                 </select>
                                             </div>
                                             <div class="col my-2">
@@ -148,8 +158,13 @@ echo $totalPages;
                                                         ?>
                                                     </td>
                                                     <td style="border: 2px solid black; text-align: center;">
-                                                        <a class="btn bg-primary" href="#">Sửa</a>
-                                                        <a class="btn bg-danger" href="#">Xóa</a>
+                                                        <a class="btn bg-primary" href="suanv.php?id=<?= $item->idNV ?>">Sửa</a>
+
+                                                        <?php if ($idus === $item->idNV || $item->chucVu === "Quản lý") : ?>
+                                                            <button class="btn btn-secondary btn-disabled" disabled>Xóa</button>
+                                                        <?php else : ?>
+                                                            <a class="btn bg-danger" href="xoanv.php?id=<?= htmlspecialchars($item->idNV) ?>">Xóa</a>
+                                                        <?php endif; ?>
                                                     </td>
                                                 </tr>
                                             <?php endforeach; ?>
