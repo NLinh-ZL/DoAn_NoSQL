@@ -273,4 +273,18 @@ class VanDon
 
         return $newId; // Giữ giá trị là kiểu số
     }
+
+    public static function getVanDonByIdVD($pdo, $idVD) {
+        // Kết nối đến cơ sở dữ liệu và collection
+        $collection = $pdo->selectCollection('VanDon');
+    
+        // Tìm vận đơn theo idVD
+        $result = $collection->findOne(['idVD' => (int) $idVD]);
+    
+        if ($result) {
+            return $result;
+        } else {
+            return null; // Hoặc xử lý trường hợp không tìm thấy
+        }
+    }
 }
