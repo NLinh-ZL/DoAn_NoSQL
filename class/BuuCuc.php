@@ -174,28 +174,29 @@ class BuuCuc
     //     return $allNhanViens;
     // }
 
-    public static function getNhanVienList($pdo, $page = 1, $limit, $search = '', $sortColumn , $sortOrder) {
+    public static function getNhanVienList($pdo, $page = 1, $limit, $search = '', $sortColumn, $sortOrder)
+    {
         $collection = $pdo->BuuCuc;
-    
+
         $skip = ($page - 1) * $limit;
-    
+
         $filter = [];
         if ($search) {
             $filter['nhanVien.hoTen'] = new MongoDB\BSON\Regex($search, 'i');
         }
-    
+
         // Kiểm tra nếu filter không có điều kiện tìm kiếm nào, không cần lọc
         if (empty($filter)) {
             $filter = new stdClass(); // Bộ lọc mặc định không lọc gì
         }
-    
+
         $sort = [];
         if (in_array($sortColumn, ['idNV', 'hoTen', 'chucVu'])) {
             $sort['nhanVien.' . $sortColumn] = ($sortOrder === 'asc') ? 1 : -1;
         } else {
             $sort['nhanVien.idNV'] = 1; // Sắp xếp mặc định theo ID
         }
-    
+
         $pipeline = [
             ['$unwind' => '$nhanVien'], // Tách nhanVien ra thành các tài liệu riêng biệt
             ['$match' => $filter], // Áp dụng bộ lọc tìm kiếm
@@ -204,57 +205,73 @@ class BuuCuc
             ['$limit' => $limit], // Giới hạn số tài liệu
             ['$group' => ['_id' => '$_id', 'nhanVien' => ['$push' => '$nhanVien']]] // Tạo lại mảng nhân viên
         ];
-    
+
         // Kiểm tra pipeline trước khi thực hiện
         // var_dump($pipeline);
-    
+
         return $collection->aggregate($pipeline, ['typeMap' => ['array' => 'array']])->toArray();
     }
-    
-    
-    
-    public static function getTotalPages($pdo, $limit, $search = '') {
+
+
+
+    public static function getTotalPages($pdo, $limit, $search = '')
+    {
         $collection = $pdo->BuuCuc;
-    
+
         $filter = [];
         if ($search) {
             $filter['nhanVien.hoTen'] = new MongoDB\BSON\Regex($search, 'i');
         }
-    
+
         // Kiểm tra nếu filter không có điều kiện tìm kiếm nào, không cần lọc
         if (empty($filter)) {
             $filter = new stdClass(); // Bộ lọc mặc định không lọc gì
         }
-    
+
         $pipeline = [
             ['$unwind' => '$nhanVien'], // Tách nhanVien ra thành các tài liệu riêng biệt
             ['$match' => $filter], // Áp dụng bộ lọc tìm kiếm
             ['$count' => 'total'] // Đếm số tài liệu
         ];
-    
+
         // Kiểm tra pipeline trước khi thực hiện
         // var_dump($pipeline);
-    
+
         $result = $collection->aggregate($pipeline)->toArray();
         $totalDocuments = isset($result[0]['total']) ? $result[0]['total'] : 0;
         return ceil($totalDocuments / $limit);
     }
-    
-    
-    
-    
-    
 
+
+
+
+    public static function getBuuCucById($pdo, $idBC) {
+        try {
+            $collection = $pdo->BuuCuc;
     
+            // Tìm kiếm thông tin bưu cục bằng idBC
+            $buuCuc = $collection->findOne(['idBC' => $idBC]);
+    
+            if ($buuCuc) {
+                return $buuCuc;
+            } else {
+                return null; // Không tìm thấy bưu cục với idBC
+            }
+        } catch (Exception $e) {
+            echo 'Lỗi: ' . $e->getMessage();
+            return null;
+        }
+    }
+
+
     public static function getNhanVienById($pdo, $idNV)
     {
         $collection = $pdo->BuuCuc;
-        // Truy vấn để tìm nhân viên với idNV cụ thể
+    
         $query = [
             'nhanVien.idNV' => (int)$idNV
         ];
-
-        // Sử dụng aggregation pipeline để lọc ra nhân viên có idNV cụ thể
+    
         $pipeline = [
             ['$unwind' => '$nhanVien'],
             ['$match' => $query],
@@ -266,24 +283,29 @@ class BuuCuc
                 'nhanVien' => 1
             ]]
         ];
-
+    
         $cursor = $collection->aggregate($pipeline);
         $result = $cursor->toArray();
-
+    
         // Kiểm tra nếu tìm thấy nhân viên
         if (count($result) > 0) {
+            $result[0]['nhanVien']['idBC'] = $result[0]['idBC'];
+            $result[0]['nhanVien']['tenBC'] = $result[0]['tenBC'];
+            $result[0]['nhanVien']['diaChi'] = $result[0]['diaChi'];
             return $result[0]['nhanVien'];
         } else {
             return null; // Không tìm thấy nhân viên
         }
     }
+    
+
 
     // Hàm lấy tất cả nhân viên giao hàng
-    public static function getAllDeliveryStaff($pdo)
+    public static function getAllDeliveryStaff($pdo,$idBC)
     {
         $collection = $pdo->BuuCuc;
         $cursor = $collection->find(
-            [], // Tìm tất cả các tài liệu trong BuuCuc
+            ['idBC' => $idBC], // Tìm tất cả các tài liệu trong BuuCuc
             [
                 'projection' => ['nhanVien' => 1], // Chỉ lấy trường nhanVien
             ]
@@ -293,7 +315,7 @@ class BuuCuc
 
         foreach ($cursor as $document) {
             foreach ($document['nhanVien'] as $staff) {
-                if ($staff['chucVu'] == 'Nhân viên giao hàng') {
+                if ($staff['chucVu'] == 'Shipper') {
                     $deliveryStaff[] = $staff;
                 }
             }
