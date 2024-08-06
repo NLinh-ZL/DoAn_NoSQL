@@ -12,7 +12,7 @@ $idus = $_SESSION['logged_id'];
 
 // Lấy tham số từ URL
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$limit = 2; // Số lượng nhân viên trên mỗi trang
+$limit = 10; // Số lượng nhân viên trên mỗi trang
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $sortColumn = isset($_GET['sortColumn']) ? $_GET['sortColumn'] : 'idNV';
 $sortOrder = isset($_GET['sortOrder']) ? $_GET['sortOrder'] : 'asc';

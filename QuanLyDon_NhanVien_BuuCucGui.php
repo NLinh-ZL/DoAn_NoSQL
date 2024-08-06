@@ -32,8 +32,8 @@ $active = isset($_GET['active']) && $_GET['active'] !== '' ? $_GET['active'] : n
 // var_dump($active);
 $total_pages_CanXacNhan = VanDon::countAllBuuCuc($pdo, $NhanVienDangNhap['idBC'], $limit, 'Vận chuyển');
 $total_pages_CanGiao = VanDon::countAllBuuCuc($pdo, $NhanVienDangNhap['idBC'], $limit, 'Đơn cần giao');
-// $total_pages_GiaoThanhCong = VanDon::countAllBuuCuc($pdo, $NhanVienDangNhap['idBC'], $limit, 'Chuyển đến bưu cục');
-// $total_pages_HuyGiao = VanDon::countAllBuuCuc($pdo, $NhanVienDangNhap['idBC'], $limit, 'Hủy giao');
+$total_pages_GiaoThanhCong = VanDon::countAllBuuCuc($pdo, $NhanVienDangNhap['idBC'], $limit, 'Chuyển đến bưu cục');
+$total_pages_HuyGiao = VanDon::countAllBuuCuc($pdo, $NhanVienDangNhap['idBC'], $limit, 'Hủy giao hàng');
 
 // $totalDocuments = VanDon::countTotalDocuments($pdo);
 
@@ -69,10 +69,9 @@ if (isset($_GET['action']) && isset($_GET['idVD'])) {
             // header("Location: QuanLyDon_NhanVien.php?active=LayThanhCong&page=" . urlencode($page));
             // exit();
         }
-    } else if ($action == 'huyhang') {
-        VanDon::LayHang_Shipper($pdo, $idVD, 'Hủy nhận hàng', $NhanVienDangNhap['idNV'], $NhanVienDangNhap['idBC'], $NhanVienDangNhap['hoTen'], $NhanVienDangNhap['tenBC'], $NhanVienDangNhap['diaChi']);
-        // header("Location: QuanLyDon_NhanVien.php?page=1&active=LayThanhCong");
-        // exit();
+    } else if ($action == 'HuyGiao') {
+        VanDon::LayHang_Shipper($pdo, $idVD, 'Giao hàng thất bại', $NhanVienDangNhap['idNV'], $NhanVienDangNhap['idBC'], $NhanVienDangNhap['hoTen'], $NhanVienDangNhap['tenBC'], $NhanVienDangNhap['diaChi']);
+        VanDon::updateTrangThaiVanDon($pdo, $idVD, 'Giao hàng thất bại');
     } else if ($action == 'chuyenhang') {
         if (isset($_GET['idBC'])) {
             $idBC = $_GET['idBC'];
@@ -216,7 +215,7 @@ ob_end_flush();
                                 </a>
                             </li>
                             <li class="nav-itemw flex-fill text-center">
-                                <a class="nav-link <?= $active === 'LayThanhCong'  ? 'active' : '' ?>" style="padding: 20px; margin: 0px;" id="pills-profile-tab" data-bs-toggle="pill" href="#pills-profile" role="tab" aria-controls="pills-profile" aria-selected="false">
+                                <a class="nav-link <?= $active === 'GiaoThanhCong'  ? 'active' : '' ?>" style="padding: 20px; margin: 0px;" id="pills-profile-tab" data-bs-toggle="pill" href="#pills-profile" role="tab" aria-controls="pills-profile" aria-selected="false">
                                     <h5 style="color: #000;">
                                         <svg fill="none" style="margin-bottom:2px;" height="25" viewBox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M17.6 5.81L11.95 2.77C11.35 2.45 10.64 2.45 10.04 2.77L4.39998 5.81C3.98998 6.04 3.72998 6.48 3.72998 6.96C3.72998 7.45 3.97998 7.89 4.39998 8.11L10.05 11.15C10.35 11.31 10.68 11.39 11 11.39C11.32 11.39 11.66 11.31 11.95 11.15L17.6 8.11C18.01 7.89 18.27 7.45 18.27 6.96C18.27 6.48 18.01 6.04 17.6 5.81Z" fill="#CECECE"></path>
@@ -230,21 +229,7 @@ ob_end_flush();
                                     <!-- <h6 style="color: #000;"><?= ($customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHang, 'quyTrinhVC.trangthai' => 'Lấy thành công'])) ?> đơn hàng</h6> -->
                                 </a>
                             </li>
-                            <li class="nav-itemw flex-fill text-center">
-                                <a class="nav-link <?= $active === 'Vanchuyen'  ? 'active' : '' ?>" style="padding: 20px;margin: 0px;" id="pills-Vanchuyen-tab" data-bs-toggle="pill" href="#pills-Vanchuyen" role="tab" aria-controls="pills-Vanchuyen" aria-selected="false">
-                                    <h5 style="color: #000;">
-                                        <svg fill="none" style="margin-bottom:2px;" height="25" viewBox="0 0 24 25" width="24" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M17.6005 5.81L11.9505 2.77C11.3505 2.45 10.6405 2.45 10.0405 2.77L4.40047 5.81C3.99047 6.04 3.73047 6.48 3.73047 6.96C3.73047 7.45 3.98047 7.89 4.40047 8.11L10.0505 11.15C10.3505 11.31 10.6805 11.39 11.0005 11.39C11.3205 11.39 11.6605 11.31 11.9505 11.15L17.6005 8.11C18.0105 7.89 18.2705 7.45 18.2705 6.96C18.2705 6.48 18.0105 6.04 17.6005 5.81Z" fill="#CECECE"></path>
-                                            <path d="M9.12 12.21L3.87 9.59C3.46 9.38 3 9.41 2.61 9.64C2.23 9.88 2 10.29 2 10.74V15.7C2 16.56 2.48 17.33 3.25 17.72L8.5 20.34C8.68 20.43 8.88 20.48 9.08 20.48C9.31 20.48 9.55 20.41 9.76 20.29C10.14 20.05 10.37 19.64 10.37 19.19V14.23C10.36 13.37 9.88 12.6 9.12 12.21Z" fill="#CECECE"></path>
-                                            <path d="M19.9996 10.74V13.2C19.5196 13.06 19.0096 13 18.4996 13C17.1396 13 15.8096 13.47 14.7596 14.31C13.3196 15.44 12.4996 17.15 12.4996 19C12.4996 19.49 12.5596 19.98 12.6896 20.45C12.5396 20.43 12.3896 20.37 12.2496 20.28C11.8696 20.05 11.6396 19.64 11.6396 19.19V14.23C11.6396 13.37 12.1196 12.6 12.8796 12.21L18.1296 9.59C18.5396 9.38 18.9996 9.41 19.3896 9.64C19.7696 9.88 19.9996 10.29 19.9996 10.74Z" fill="#CECECE"></path>
-                                            <path d="M21.6804 15.82C20.7904 14.93 19.6104 14.48 18.4404 14.5C17.3104 14.51 16.1804 14.96 15.3204 15.82C14.7204 16.41 14.3304 17.15 14.1404 17.92C14.0304 18.34 13.9904 18.77 14.0204 19.2V19.25C14.0204 19.32 14.0304 19.38 14.0404 19.46C14.0404 19.46 14.0404 19.46 14.0504 19.47V19.5C14.1404 20.48 14.5604 21.43 15.3204 22.18C16.4804 23.34 18.1104 23.73 19.5804 23.36C20.0204 23.25 20.4504 23.07 20.8504 22.83C21.1504 22.66 21.4304 22.44 21.6804 22.18C22.4304 21.43 22.8604 20.48 22.9504 19.49C22.9604 19.49 22.9604 19.47 22.9604 19.46C22.9804 19.39 22.9804 19.31 22.9804 19.24C22.9804 19.23 22.9904 19.21 22.9904 19.19C23.0504 17.98 22.6104 16.74 21.6804 15.82ZM20.2304 20.71C19.9404 21 19.4704 21 19.1704 20.71L18.5104 20.05L17.8304 20.73C17.5304 21.03 17.0604 21.03 16.7704 20.73C16.4704 20.44 16.4704 19.97 16.7704 19.67L17.4504 18.99L16.7904 18.33C16.5004 18.03 16.5004 17.56 16.7904 17.27C17.0904 16.97 17.5604 16.97 17.8604 17.27L18.5104 17.93L19.1404 17.29C19.4404 17 19.9104 17 20.2104 17.29C20.5004 17.59 20.5004 18.06 20.2104 18.36L19.5704 18.99L20.2304 19.64C20.5304 19.94 20.5304 20.41 20.2304 20.71Z" fill="#CECECE"></path>
-                                        </svg>
-
-                                        Vận chuyển
-                                    </h5>
-                                    <!-- <h6 style="color: #000;"><?= ($customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHang, 'quyTrinhVC.trangthai' => 'Hủy giao'])) ?> đơn hàng</h6> -->
-                                </a>
-                            </li>
+                           
                             <li class="nav-itemw flex-fill text-center">
                                 <a class="nav-link <?= $active === 'HuyGiao'  ? 'active' : '' ?>" style="padding: 20px;margin: 0px;" id="pills-huy-tab" data-bs-toggle="pill" href="#pills-huy" role="tab" aria-controls="pills-huy" aria-selected="false">
                                     <h5 style="color: #000;">
@@ -266,42 +251,7 @@ ob_end_flush();
                         </ul>
                         <div class="tab-content mt-2 mb-3" id="pills-tabContent" style="border-top: 3px solid #dc3545;">
 
-                            <style>
-                                .card-header {
-                                    display: flex;
-                                    /* Sử dụng Flexbox để các phần tử nằm trên cùng một dòng */
-                                    flex-wrap: wrap;
-                                    /* Cho phép các phần tử xuống dòng nếu không đủ chỗ */
-                                    gap: 10px;
-                                    /* Khoảng cách giữa các phần tử */
-                                }
-
-                                .switch-wrap {
-                                    display: flex;
-                                    align-items: center;
-                                    /* Căn giữa các phần tử theo chiều dọc */
-                                    margin: 10px;
-                                    /* Khoảng cách giữa các dòng */
-                                }
-
-                                .switch-wrap p {
-                                    margin: 0;
-                                    /* Loại bỏ khoảng cách mặc định của <p> */
-                                    margin-left: 10px;
-                                    /* Khoảng cách giữa checkbox và tên bưu cục */
-                                }
-
-                                .primary-checkbox {
-                                    display: flex;
-                                    align-items: center;
-                                    /* Căn giữa checkbox và label theo chiều dọc */
-                                }
-
-                                .primary-checkbox input {
-                                    margin-right: 10px;
-                                    /* Khoảng cách giữa checkbox và label */
-                                }
-                            </style>
+                         
 
 
                             <div class="tab-pane fade  <?= ($active == null || $active == 'ChoXacNhan')  ? 'show active' : '';
@@ -425,14 +375,14 @@ ob_end_flush();
                                                 <td><?= $order['loaiHang'] ?></td>
                                                 <td><?= $tongKhoiLuong ?> kg</td>
 
-                                                <td><a <?= !isset($_GET['idNhanVien']) ? 'class="disabled"' : '' ?> href="QuanLyDon_NhanVien_BuuCucGui.php?action=xacNhanGiao&active=CanGiao&idNhanVien=<?= $Nhanvien['idNV'] ?>&idVD=<?= $order['idVD'] ?>">
+                                                <td><a <?= !isset($_GET['idNhanVien']) ? 'class="disabled"' : '' ?> href="QuanLyDon_NhanVien_BuuCucGui.php?page=<?=$page?>&action=xacNhanGiao&active=CanGiao&idNhanVien=<?= $Nhanvien['idNV'] ?>&idVD=<?= $order['idVD'] ?>">
                                                         <button class="btn btn-success <?= !isset($_GET['idNhanVien']) ? 'disabled' : '' ?>">
                                                             <span class="btn-label  ">
                                                                 <i class="fa fa-check "></i>
                                                             </span>
 
                                                         </button>
-                                                    </a></td>
+                                                    </a>    </td>
 
                                               <!-- Xuất trạng thái quy trình cuối cùng -->
                                             </tr>
@@ -456,8 +406,8 @@ ob_end_flush();
                                     </ul>
                                 </nav>
                             </div>
-                            <div class="tab-pane fade  <?= $active === 'LayThanhCong'  ? 'show active' : '';
-                                                        $page = $active !== 'LayThanhCong' ? 1 : ($_GET['page']); ?> " id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+                            <div class="tab-pane fade  <?= $active === 'GiaoThanhCong'  ? 'show active' : '';
+                                                        $page = $active !== 'GiaoThanhCong' ? 1 : ($_GET['page']); ?> " id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
                                 <table class="table">
                                     <thead>
                                         <tr>
@@ -469,15 +419,15 @@ ob_end_flush();
                                             <th scope="col">Ngày nhận</th>
                                             <th scope="col">Loại hàng</th>
                                             <th scope="col">Khối lượng</th>
-                                            <th scope="col">Xác nhận</th>
+                                            <th scope="col">Xem chi tiết</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <?php
                                         $STT = 1;
                                         $offset = ($page - 1) * $limit;;
-                                        $LayThanhCong = VanDon::getDonHangTrangThai($pdo, $NhanVienDangNhap['idBC'], $limit, $offset, 'Giao thành công');
-                                        foreach ($LayThanhCong as $order) :
+                                        $GiaoThanhCong = VanDon::getDonHangTrangThai($pdo, $NhanVienDangNhap['idBC'], $limit, $offset, 'Giao hàng thành công');
+                                        foreach ($GiaoThanhCong as $order) :
                                             $tongKhoiLuong = 0;
                                             foreach ($order['hangHoa'] as $hang) {
                                                 $tongKhoiLuong += $hang['trongLuong'];
@@ -495,15 +445,10 @@ ob_end_flush();
 
                                                 <td><a href="QuanLyDon_NhanVien.php?page=<?= $page  ?>&action=nhanhang&active=LayThanhCong&idVD=<?= $order['idVD'] ?>">
                                                         <button class="btn btn-success " style="margin: 5px;">
-                                                            Nhận hàng
+                                                            Xem chi tiết
                                                         </button>
                                                     </a>
-                                                    <a href="QuanLyDon_NhanVien.php?action=huyhang&active=LayThanhCong&idVD=<?= $order['idVD'] ?>">
-                                                        <button class="btn btn-danger ">
-                                                            Hủy hàng
-
-                                                        </button>
-                                                    </a>
+                                                   
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -525,105 +470,7 @@ ob_end_flush();
                                     </ul>
                                 </nav> -->
                             </div>
-                            <div class="tab-pane fade  <?= $active === 'Vanchuyen'  ? 'show active' : '';
-                                                        $page = $active !== 'Vanchuyen' ? 1 : ($_GET['page']); ?>" id="pills-Vanchuyen" role="tabpanel" aria-labelledby="pills-Vanchuyen-tab">
-                                <form action="QuanLyDon_NhanVien.php?page=<?= $page  ?>&active=Vanchuyen" method="post">
-
-                                    <div class="card-header">
-                                        <?php foreach ($buucuc as $BuuCuc) : ?>
-                                            <div class="switch-wrap ">
-                                                <div class="primary-checkbox  ">
-                                                    <input <?= in_array($BuuCuc->diaChi, $buucucDiachiArray) ? 'checked' : '' ?> type="checkbox" id="inlineCheckbox<?= $BuuCuc->diaChi ?>" value="<?= $BuuCuc->diaChi ?>" name="BuuCuc_diachi[]">
-                                                    <label for="inlineCheckbox<?= $BuuCuc->diaChi ?>"></label>
-                                                </div>
-                                                <p style="margin: 0px;"><?= $BuuCuc->tenBC ?></p>
-                                            </div>
-                                        <?php
-                                        endforeach; ?>
-
-                                        <input type="submit" value="Chọn">
-                                    </div>
-
-                                </form>
-                                <table class="table" style="border-top: 3px solid #dc3545;">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">STT</th>
-                                            <th scope="col">Mã vận đơn</th>
-
-                                            <th scope="col">Ngày tạo</th>
-
-
-                                            <th scope="col">Loại hàng</th>
-                                            <th scope="col">Khối lượng</th>
-                                            <th scope="col">Tên Bưu cục nhận</th>
-                                            <th scope="col">Địa chỉ Bưu cục nhận</th>
-                                            <th scope="col">Xác nhận</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php
-                                        $STT = 1;
-                                        $offset = ($page - 1) * $limit;
-
-                                        $Vanchuyen = VanDon::getDonHangTrangThai($pdo, $NhanVienDangNhap['idBC'], $limit, $offset, 'Đã nhận hàng');
-                                        foreach ($Vanchuyen as $order) :
-                                            $tongKhoiLuong = 0;
-                                            // var_dump($order['nguoiNhan']['diaChi']["diaChi"]);
-                                            // $newAddress = '842/39/6 Tỉnh Lộ 10, Bình Trị Đông A, Quận Bình Tân,TP HCM';
-
-                                            $diaChiString = json_encode($order['nguoiNhan']['diaChi']);
-
-                                            // var_dump($buucucDiachiArray);
-                                            // $result = findNearestAddress($newAddress, $mongoUri, $dbName, $collectionName, $googleApiKey);
-                                            $result = findNearestAddressAndRemoveAddress($order['nguoiNhan']['diaChi']["diaChi"], $mongoUri, $dbName, $collectionName, $googleApiKey, $buucucDiachiArray);
-
-                                            foreach ($order['hangHoa'] as $hang) {
-                                                $tongKhoiLuong += $hang['trongLuong'];
-                                            }
-                                        ?>
-                                            <tr>
-                                                <th scope="row"><?= $STT++ ?></th>
-                                                <td><?= $order['idVD'] ?></td>
-
-                                                <td><?= $order['ngayTao']->toDateTime()->format('Y-m-d H:i:s') ?></td>
-                                                <td><?= $order['nguoiNhan']['hoTen'] ?></td>
-                                                <td><?= $order['thoiGianHenGiao'] ?></td>
-                                                <td><?= $result['nearestAddress']['tenBC'] ?></td>
-                                                <!-- <td><?= $tongKhoiLuong ?> kg</td> -->
-                                                <td><?= $result['nearestAddress']['diaChi'] ?></td>
-                                                <td><a href="QuanLyDon_NhanVien.php?action=chuyenhang&active=Vanchuyen&idVD=<?= $order['idVD'] ?>&page=<?= $page ?>&idBC=<?= $result['nearestAddress']['idBC'] ?>">
-                                                        <button class="btn btn-success " style="margin: 5px;">
-                                                            Nhận hàng
-                                                        </button>
-                                                    </a>
-                                                    <a href="QuanLyDon_NhanVien.php?action=huyhang&active=Vanchuyen&idVD=<?= $order['idVD'] ?>&page=<?= $page  ?>">
-                                                        <button class="btn btn-danger ">
-                                                            Hủy hàng
-
-                                                        </button>
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody><?php $buucucDiachiArray = []; ?>
-                                </table>
-                                <!-- <nav aria-label="Page navigation example">
-                                    <ul class="pagination justify-content-end">
-                                        <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
-                                            <a class="page-link" href="QuanLyDon_NhanVien.php?page=<?= $page - 1 ?>&active=Vanchuyen">Previous</a>
-                                        </li>
-                                        <?php for ($i = 1; $i <= $total_pages_VanChuyen; $i++) : ?>
-                                            <li class="page-item  <?= $i == $page ? 'active' : '' ?>">
-                                                <a class="page-link" href="QuanLyDon_NhanVien.php?page=<?= $i ?>&active=Vanchuyen"><?= $i ?></a>
-                                            </li>
-                                        <?php endfor; ?>
-                                        <li class="page-item <?= $page >= $total_pages_VanChuyen ? 'disabled' : '' ?>">
-                                            <a class="page-link" href="QuanLyDon_NhanVien.php?page=<?= $page + 1 ?>&active=Vanchuyen">Next</a>
-                                        </li>
-                                    </ul>
-                                </nav> -->
-                            </div>
+                        
                             <!-- Huy giao ----------------------------------------------------------------------------------------------- -->
                             <div class="tab-pane fade  <?= $active === 'HuyGiao'  ? 'show active' : '';
                                                         $page = $active !== 'HuyGiao' ? 1 : ($_GET['page']); ?>" id="pills-huy" role="tabpanel" aria-labelledby="pills-huy-tab">
@@ -647,7 +494,7 @@ ob_end_flush();
                                         $STT = 1;
                                         $offset = ($page - 1) * $limit;
 
-                                        $Huygiao = VanDon::getDonHangTrangThai($pdo, $NhanVienDangNhap['idBC'], $limit, $offset, 'Hủy nhận hàng');
+                                        $Huygiao = VanDon::getDonHangTrangThai($pdo, $NhanVienDangNhap['idBC'], $limit, $offset, 'Giao hàng thất bại');
                                         foreach ($Huygiao as $order) :
                                             $tongKhoiLuong = 0;
                                             foreach ($order['hangHoa'] as $hang) {

@@ -21,6 +21,8 @@ $hoTenGui = $us['hoTen'];
 if($orderData['nguoiTraCuoc']=='Người gửi')
 {
     $ttc="Đã thanh toán";
+}else if($orderData['nguoiTraCuoc']=='Người nhận'){
+    $ttc= "Chưa thanh toán";
 }
 
 // Kiểm tra xác nhận

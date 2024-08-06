@@ -122,7 +122,40 @@ class VanDon
     //         return "Thêm quy trình vận chuyển thất bại hoặc vận đơn không tồn tại!";
     //     }
     // }
-
+    
+    public static function updateTrangThaiVanDon($database, $idVD, $trangThaiMoi)
+    {
+        $collection = $database->selectCollection('VanDon');
+    
+        if ($collection === null) {
+            die("Bộ sưu tập không tồn tại: VanDon");
+        }
+    
+        // Lấy thời gian hiện tại
+        $ngayNhan = new MongoDB\BSON\UTCDateTime();
+    
+        // Cập nhật tình trạng mới và ngày nhận cho vận đơn với idVD cụ thể
+        $result = $collection->updateOne(
+            ['idVD' => (int)$idVD], // Điều kiện tìm tài liệu
+            [
+                '$set' => [
+                    'tinhTrang' => $trangThaiMoi, // Cập nhật tình trạng mới
+                    'ngayNhan' => $ngayNhan // Cập nhật ngày nhận
+                ]
+            ]
+        );
+    
+        // Kiểm tra kết quả cập nhật
+        if ($result->getMatchedCount() == 0) {
+            return "Vận đơn không tồn tại!";
+        } elseif ($result->getModifiedCount() == 0) {
+            return "Tình trạng vận đơn không thay đổi!";
+        } else {
+            return "Cập nhật tình trạng vận đơn thành công!";
+        }
+    }
+    
+    
     public static function XacNhanVD_BuuCuc($database, $idVD, $trangthai, $idNhanVien, $idBC, $tenBC, $diachiBC)
     {
         $collection = $database->selectCollection('VanDon'); // Corrected the collection name to 'VanDon'

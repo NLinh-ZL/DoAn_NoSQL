@@ -50,35 +50,14 @@
         <!-- Header Start -->
         <div class="header-area">
             <div class="main-header ">
-                <div class="header-top d-none d-lg-block">
-                    <div class="container">
-                        <div class="col-xl-12">
-                            <div class="row d-flex justify-content-between align-items-center">
-                                <div class="header-info-left">
-                                    <ul>
-                                        <li>Phone: +99 (0) 101 0000 888</li>
-                                        <li>Email: noreply@yourdomain.com</li>
-                                    </ul>
-                                </div>
-                                <div class="header-info-right">
-                                    <ul class="header-social">
-                                        <li><a href="#"><i class="fab fa-twitter"></i></a></li>
-                                        <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
-                                        <li><a href="#"><i class="fab fa-linkedin-in"></i></a></li>
-                                        <li> <a href="#"><i class="fab fa-google-plus-g"></i></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
                 <div class="header-bottom  header-sticky">
                     <div class="container">
                         <div class="row align-items-center">
                             <!-- Logo -->
                             <div class="col-xl-2 col-lg-2">
                                 <div class="logo">
-                                    <a href="index.php"><img src="https://viettelpost.vn/assets/images/logo-20210202.png" height="130" style="margin-top:20px;" alt=""></a>
+                                    <a href="index.php"><img src="https://viettelpost.vn/assets/images/logo-20210202.png" alt="" height="150"></a>
                                 </div>
                             </div>
                             <div class="col-xl-10 col-lg-10">
@@ -89,7 +68,7 @@
                                             <ul id="navigation">
                                                 <?php if (isset($_SESSION['logged_name'])) : ?>
 
-                                                    <?php if ($_SESSION['logged_role']==1 &&$_SESSION['logged_chucvu']=="Quản lý") : ?>
+                                                    <?php if ($_SESSION['logged_role'] == 1 && $_SESSION['logged_chucvu'] == "Quản lý") : ?>
                                                         <li><a href="index.php">Trang chủ</a></li>
                                                         <li><a href="QuanLyDon.php">Quản lý Đơn</a></li>
                                                         <li><a href="#">Quản lý</a>
@@ -105,7 +84,7 @@
                                                         </li>
                                                     <?php endif; ?>
 
-                                                    <?php if ($_SESSION['logged_role']==1 &&$_SESSION['logged_chucvu']=="Nhân viên") : ?>
+                                                    <?php if ($_SESSION['logged_role'] == 1 && $_SESSION['logged_chucvu'] == "Nhân viên") : ?>
                                                         <li><a href="index.php">Trang chủ</a></li>
                                                         <li><a href="QuanLyDon.php">Quản lý Đơn</a></li>
                                                         <li><a href="#"><?= $_SESSION['logged_name']  ?></a>
@@ -115,9 +94,10 @@
                                                         </li>
                                                     <?php endif; ?>
 
-                                                    <?php if ($_SESSION['logged_role']=="0") : ?>
+                                                    <?php if ($_SESSION['logged_role'] == "0") : ?>
                                                         <li><a href="index.php">Trang chủ</a></li>
                                                         <li><a href="taodon.php">Tạo đơn</a></li>
+                                                        <li><a href="QuanLyDon.php">Quản lý đơn</a></li>
                                                         <li><a href="#"><?= $_SESSION['logged_name']  ?></a>
                                                             <ul class="submenu">
                                                                 <li><a href="dangxuat.php">Đăng xuất</a></li>
@@ -135,19 +115,24 @@
                                                         </ul>
                                                     </li>
                                                 <?php endif; ?>
+
                                             </ul>
                                         </nav>
                                     </div>
+                                    <!-- Header-btn -->
+                                    <!-- <div class="header-right-btn d-none d-lg-block ml-20">
+                                        <a href="contact.html" class="btn header-btn">Get A Qoue</a>
+                                    </div> -->
                                 </div>
-                            </div>
-                            <!-- Mobile Menu -->
-                            <div class="col-12">
-                                <div class="mobile_menu d-block d-lg-none"></div>
+
+                                <!-- Mobile Menu -->
+                                <div class="col-12">
+                                    <div class="mobile_menu d-block d-lg-none"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <!-- Header End -->
+            <!-- Header End -->
     </header>
