@@ -45,72 +45,94 @@
         </div>
     </div>
 </div> -->
-<!-- Preloader Start -->
-<header>
-    <!-- Header Start -->
-    <div class="header-area">
-        <div class="main-header ">
-           
-            <div class="header-bottom  header-sticky">
-                <div class="container">
-                    <div class="row align-items-center">
-                        <!-- Logo -->
-                        <div class="col-xl-2 col-lg-2">
-                            <div class="logo">
-                                <a href="index.php"><img src="https://viettelpost.vn/assets/images/logo-20210202.png" alt="" height="150" ></a>
-                            </div>
-                        </div>
-                        <div class="col-xl-10 col-lg-10">
-                            <div class="menu-wrapper  d-flex align-items-center justify-content-end">
-                                <!-- Main-menu -->
-                                <div class="main-menu d-none d-lg-block">
-                                    <nav> 
-                                        <ul id="navigation">                                                                                          
-                                            <li><a href="index.php">Trang chủ</a></li>
-                                            <li><a href="taodon.php">Tạo đơn</a></li>
-                                            <li><a href="QuanLyDon.php">Quản lý Đơn</a></li>
-                                            <li><a href="#">BBB</a></li>
-                                            <?php if(isset($_SESSION['logged_name'])):?>
-                                            <li><a href="#">Quản lý</a>
-                                                <ul class="submenu">
-                                                    <li><a href="quanlynv.php">Quản Lý nhân viên</a></li>
-                                                    <li><a href="themnv.php">Thêm nhân viên</a></li>
-                                                </ul>
-                                            </li>
-                                            <?php endif; ?>
-                                            <?php if(isset($_SESSION['logged_name'])):?>
-                                            <li><a href="#"><?= $_SESSION['logged_name']  ?></a>
-                                                <ul class="submenu">
-                                                    <li><a href="#">Thông tin</a></li>
-                                                    <li><a href="dangxuat.php">Đăng xuất</a></li>
-                                                </ul>
-                                            </li>
-                                            <?php else: ?>
-                                            <li><a href="#">Tài khoản</a>
-                                                <ul class="submenu">
-                                                    <li><a href="dangnhap.php">Đăng nhập</a></li>
-                                                    <li><a href="dangky.php">Đăng ký</a></li>
-                                                </ul>
-                                            </li>
-                                            <?php endif; ?>
-                                            
-                                        </ul>
-                                    </nav>
+    <!-- Preloader Start -->
+    <header>
+        <!-- Header Start -->
+        <div class="header-area">
+            <div class="main-header ">
+
+                <div class="header-bottom  header-sticky">
+                    <div class="container">
+                        <div class="row align-items-center">
+                            <!-- Logo -->
+                            <div class="col-xl-2 col-lg-2">
+                                <div class="logo">
+                                    <a href="index.php"><img src="https://viettelpost.vn/assets/images/logo-20210202.png" alt="" height="150"></a>
                                 </div>
-                                <!-- Header-btn -->
+                            </div>
+                            <div class="col-xl-10 col-lg-10">
+                                <div class="menu-wrapper  d-flex align-items-center justify-content-end">
+                                    <!-- Main-menu -->
+                                    <div class="main-menu d-none d-lg-block">
+                                        <nav>
+                                            <ul id="navigation">
+                                                <?php if (isset($_SESSION['logged_name'])) : ?>
+
+                                                    <?php if ($_SESSION['logged_role'] == 1 && $_SESSION['logged_chucvu'] == "Quản lý") : ?>
+                                                        <li><a href="index.php">Trang chủ</a></li>
+                                                        <li><a href="QuanLyDon.php">Quản lý Đơn</a></li>
+                                                        <li><a href="#">Quản lý</a>
+                                                            <ul class="submenu">
+                                                                <li><a href="quanlynv.php">Quản Lý nhân viên</a></li>
+                                                                <li><a href="themnv.php">Thêm nhân viên</a></li>
+                                                            </ul>
+                                                        </li>
+                                                        <li><a href="#"><?= $_SESSION['logged_name']  ?></a>
+                                                            <ul class="submenu">
+                                                                <li><a href="dangxuat.php">Đăng xuất</a></li>
+                                                            </ul>
+                                                        </li>
+                                                    <?php endif; ?>
+
+                                                    <?php if ($_SESSION['logged_role'] == 1 && $_SESSION['logged_chucvu'] == "Nhân viên") : ?>
+                                                        <li><a href="index.php">Trang chủ</a></li>
+                                                        <li><a href="QuanLyDon.php">Quản lý Đơn</a></li>
+                                                        <li><a href="#"><?= $_SESSION['logged_name']  ?></a>
+                                                            <ul class="submenu">
+                                                                <li><a href="dangxuat.php">Đăng xuất</a></li>
+                                                            </ul>
+                                                        </li>
+                                                    <?php endif; ?>
+
+                                                    <?php if ($_SESSION['logged_role'] == "0") : ?>
+                                                        <li><a href="index.php">Trang chủ</a></li>
+                                                        <li><a href="taodon.php">Tạo đơn</a></li>
+                                                        <li><a href="QuanLyDon.php">Quản lý đơn</a></li>
+                                                        <li><a href="#"><?= $_SESSION['logged_name']  ?></a>
+                                                            <ul class="submenu">
+                                                                <li><a href="dangxuat.php">Đăng xuất</a></li>
+                                                            </ul>
+                                                        </li>
+                                                    <?php endif; ?>
+
+                                                <?php else : ?>
+                                                    <li><a href="index.php">Trang chủ</a></li>
+                                                    <li><a href="taodon.php">Tạo đơn</a></li>
+                                                    <li><a href="#">Tài khoản</a>
+                                                        <ul class="submenu">
+                                                            <li><a href="dangnhap.php">Đăng nhập</a></li>
+                                                            <li><a href="dangky.php">Đăng ký</a></li>
+                                                        </ul>
+                                                    </li>
+                                                <?php endif; ?>
+
+                                            </ul>
+                                        </nav>
+                                    </div>
+                                    <!-- Header-btn -->
                                     <!-- <div class="header-right-btn d-none d-lg-block ml-20">
                                         <a href="contact.html" class="btn header-btn">Get A Qoue</a>
                                     </div> -->
-                            </div>
-                   
-                            <!-- Mobile Menu -->
-                            <div class="col-12">
-                                <div class="mobile_menu d-block d-lg-none"></div>
+                                </div>
+
+                                <!-- Mobile Menu -->
+                                <div class="col-12">
+                                    <div class="mobile_menu d-block d-lg-none"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <!-- Header End -->
+            <!-- Header End -->
     </header>

@@ -753,7 +753,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <!-- =============================================================================================== -->
 <?php
 } else {
-    header("Location: dangky.php");
+    header("Location: dangnhap.php");
     exit;
 }
 ?>

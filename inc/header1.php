@@ -60,12 +60,17 @@ $kh = KhachHang::getUserById($pdo, $_SESSION['logged_id']);
             <div class="sidebar-wrapper scrollbar scrollbar-inner">
                 <div class="sidebar-content">
                     <ul class="nav nav-secondary">
-                        <li class="nav-item active">
-                            <a data-bs-toggle="collapse" href="/home" class="collapsed" aria-expanded="false">
+                        <li class="nav-item ">
+                            <a data-bs-toggle="collapse" href="index.php" class="collapsed" aria-expanded="false">
                                 <i class="fas fa-home"></i>
                                 <p>HOME</p>
                                 <!-- <span class="caret"></span> -->
                             </a>
+                            <!-- <a data-bs-toggle="collapse" href="dangxuat.php" class="collapsed" aria-expanded="false">
+                            <i class="icon-logout"></i>
+                                <p>LOGOUT</p>
+                               
+                            </a> -->
                             <!-- <div class="collapse" id="dashboard">
                                 <ul class="nav nav-collapse">
                                     <li>
@@ -76,6 +81,7 @@ $kh = KhachHang::getUserById($pdo, $_SESSION['logged_id']);
                                 </ul>
                             </div> -->
                         </li>
+                        
                         <li class="nav-section">
                             <span class="sidebar-mini-icon">
                                 <i class="fa fa-ellipsis-h"></i>
@@ -147,7 +153,7 @@ $kh = KhachHang::getUserById($pdo, $_SESSION['logged_id']);
                             <div class="collapse" id="sidebarLayouts">
                                 <ul class="nav nav-collapse">
                                     <?php $role = $_SESSION['logged_role'];
-                                    if ($role === 0) : ?>
+                                    if ($role === "0") : ?>
                                         <li>
                                             <a href="QuanLyDon.php">
                                                 <span class="sub-item">Quản lý vận đơn</span>
@@ -176,11 +182,11 @@ $kh = KhachHang::getUserById($pdo, $_SESSION['logged_id']);
                                         <?php endif; ?>
                                     <?php endif; ?>
 
-                                 
+
                                 </ul>
                             </div>
                         </li>
-                      
+
                         <li class="nav-item">
                             <a data-bs-toggle="collapse" href="#maps">
                                 <i class="fas fa-map-marker-alt"></i>
@@ -202,10 +208,10 @@ $kh = KhachHang::getUserById($pdo, $_SESSION['logged_id']);
                                 </ul>
                             </div>
                         </li>
-                       
-                       
-                        
-                      
+
+
+
+
                     </ul>
                 </div>
             </div>
