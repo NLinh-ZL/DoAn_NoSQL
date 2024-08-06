@@ -74,6 +74,52 @@ function findNearestAddress($newAddress, $mongoUri, $dbName, $collectionName, $g
     return ['nearestAddress' => $nearestAddress, 'shortestDistance' => $shortestDistanceText];
 }
 
+function findNearestAddressAndRemoveAddress($newAddress, $mongoUri, $dbName, $collectionName, $googleApiKey, $buucucDiachiArray = []) {
+    // Kiểm tra biến $buucucDiachiArray
+    if (!is_array($buucucDiachiArray)) {
+        echo 'Biến $buucucDiachiArray không phải là mảng.';
+        return;
+    }
+
+    // Tạo kết nối MongoDB
+    $client = new MongoDB\Client($mongoUri); // Thay đổi ở đây nếu cần
+    $collection = $client->selectDatabase($dbName)->selectCollection($collectionName);
+
+    $newLocation = geocodeAddress($newAddress, $googleApiKey);
+
+    $addresses = $collection->find([]);
+
+    $nearestAddress = null;
+    $shortestDistance = PHP_INT_MAX;
+    $shortestDistanceText = '';
+
+    foreach ($addresses as $address) {
+        // Kiểm tra chỉ mục 'address'
+        if (!isset($address['diaChi'])) {
+            continue; // Bỏ qua nếu chỉ mục 'address' không tồn tại
+        }
+
+        // Kiểm tra địa chỉ có nằm trong danh sách loại trừ không
+        if (in_array($address['diaChi'], $buucucDiachiArray, true)) {
+            continue; // Bỏ qua địa chỉ nếu nó có trong danh sách loại trừ
+        }
+
+        try {
+            $distanceText = getDrivingDistance($newAddress, $address['diaChi'], $googleApiKey);
+            $distance = floatval(str_replace([' km', ','], '', $distanceText));
+
+            if ($distance < $shortestDistance) {
+                $shortestDistance = $distance;
+                $shortestDistanceText = $distanceText;
+                $nearestAddress = $address;
+            }
+        } catch (Exception $e) {
+            echo 'Lỗi: ' . $e->getMessage() . PHP_EOL;
+        }
+    }
+
+    return ['nearestAddress' => $nearestAddress, 'shortestDistance' => $shortestDistanceText];
+}
 
 // Xuất tất cả các địa chỉ từ MongoDB
 // function listAddresses($mongoUri, $dbName, $collectionName) {

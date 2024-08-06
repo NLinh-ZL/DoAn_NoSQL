@@ -282,18 +282,33 @@ class BuuCuc
 
 
 
-
+    public static function getBuuCucById($pdo, $idBC) {
+        try {
+            $collection = $pdo->BuuCuc;
+    
+            // Tìm kiếm thông tin bưu cục bằng idBC
+            $buuCuc = $collection->findOne(['idBC' => $idBC]);
+    
+            if ($buuCuc) {
+                return $buuCuc;
+            } else {
+                return null; // Không tìm thấy bưu cục với idBC
+            }
+        } catch (Exception $e) {
+            echo 'Lỗi: ' . $e->getMessage();
+            return null;
+        }
+    }
 
 
     public static function getNhanVienById($pdo, $idNV)
     {
         $collection = $pdo->BuuCuc;
-        // Truy vấn để tìm nhân viên với idNV cụ thể
+    
         $query = [
             'nhanVien.idNV' => (int)$idNV
         ];
-
-        // Sử dụng aggregation pipeline để lọc ra nhân viên có idNV cụ thể
+    
         $pipeline = [
             ['$unwind' => '$nhanVien'],
             ['$match' => $query],
@@ -305,24 +320,29 @@ class BuuCuc
                 'nhanVien' => 1
             ]]
         ];
-
+    
         $cursor = $collection->aggregate($pipeline);
         $result = $cursor->toArray();
-
+    
         // Kiểm tra nếu tìm thấy nhân viên
         if (count($result) > 0) {
+            $result[0]['nhanVien']['idBC'] = $result[0]['idBC'];
+            $result[0]['nhanVien']['tenBC'] = $result[0]['tenBC'];
+            $result[0]['nhanVien']['diaChi'] = $result[0]['diaChi'];
             return $result[0]['nhanVien'];
         } else {
             return null; // Không tìm thấy nhân viên
         }
     }
+    
+
 
     // Hàm lấy tất cả nhân viên giao hàng
-    public static function getAllDeliveryStaff($pdo)
+    public static function getAllDeliveryStaff($pdo,$idBC)
     {
         $collection = $pdo->BuuCuc;
         $cursor = $collection->find(
-            [], // Tìm tất cả các tài liệu trong BuuCuc
+            ['idBC' => $idBC], // Tìm tất cả các tài liệu trong BuuCuc
             [
                 'projection' => ['nhanVien' => 1], // Chỉ lấy trường nhanVien
             ]
@@ -332,7 +352,7 @@ class BuuCuc
 
         foreach ($cursor as $document) {
             foreach ($document['nhanVien'] as $staff) {
-                if ($staff['chucVu'] == 'Nhân viên giao hàng') {
+                if ($staff['chucVu'] == 'Shipper') {
                     $deliveryStaff[] = $staff;
                 }
             }

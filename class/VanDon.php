@@ -38,6 +38,37 @@ class VanDon
     }
 
 
+    public static function countAllBuuCuc($database, $idBuuCuc, $limit, $trangthai = null)
+{
+    $collection = $database->VanDon; // Chọn bộ sưu tập 'VanDon'
+    
+    if ($collection === null) {
+        die("Bộ sưu tập không tồn tại: VanDon");
+    }
+    
+    // Pipeline cho aggregate
+    $pipeline = [
+        // Lọc theo idBuuCuc
+        ['$match' => ['quyTrinhVC.idBC' => $idBuuCuc]],
+        // Lọc để lấy quy trình VC cuối cùng
+        ['$addFields' => ['lastQuyTrinhVC' => ['$arrayElemAt' => ['$quyTrinhVC', -1]]]],
+        // Lọc theo trạng thái của quy trình VC cuối cùng
+        ['$match' => ['lastQuyTrinhVC.trangthai' => $trangthai]]
+    ];
+
+    // Đếm số tài liệu
+    $countPipeline = array_merge($pipeline, [['$count' => 'total']]);
+    $countCursor = $collection->aggregate($countPipeline);
+    $count = $countCursor->toArray()[0]['total'] ?? 0;
+    
+    // Tính tổng số trang dựa trên $limit
+    $total_pages = ceil($count / $limit);
+    
+    return $total_pages;
+}
+
+    
+
     public static function countAll($database, $limit, $tinhtrang = null, $idKhachHang)
     {
         $collection = $database->VanDon; // Chọn bộ sưu tập 'VanDon'
@@ -61,14 +92,45 @@ class VanDon
         return $total_pages;
     }
 
+    // public static function XacNhanVD_BuuCuc($database, $idVD, $trangthai, $idNhanVien, $idBC, $tenBC, $diachiBC)
+    // {
+    //     $collection = $database->VanDon; // Chọn bộ sưu tập 'VanDon'
+
+    //     if ($collection === null) {
+    //         die("Bộ sưu tập không tồn tại: VanDon");
+    //     }
+
+    //     // Quy trình mới cần thêm
+    //     $quyTrinhMoi = [
+    //         'trangthai' => $trangthai,
+    //         'idNV' => $idNhanVien,
+    //         'idBC' => $idBC,
+    //         'tenBC' => $tenBC,
+    //         'diachiBC' => $diachiBC
+    //     ];
+
+    //     // Tìm và cập nhật vận đơn với idVD cụ thể
+    //     $result = $collection->updateOne(
+    //         ['idVD' => $idVD],
+    //         ['$push' => ['quyTrinhVC' => $quyTrinhMoi]]
+    //     );
+
+    //     // Kiểm tra kết quả cập nhật
+    //     if ($result->getModifiedCount() == 1) {
+    //         return "Thêm quy trình vận chuyển thành công!";
+    //     } else {
+    //         return "Thêm quy trình vận chuyển thất bại hoặc vận đơn không tồn tại!";
+    //     }
+    // }
+
     public static function XacNhanVD_BuuCuc($database, $idVD, $trangthai, $idNhanVien, $idBC, $tenBC, $diachiBC)
     {
-        $collection = $database->VanDon; // Chọn bộ sưu tập 'VanDon'
-
+        $collection = $database->selectCollection('VanDon'); // Corrected the collection name to 'VanDon'
+    
         if ($collection === null) {
             die("Bộ sưu tập không tồn tại: VanDon");
         }
-
+    
         // Quy trình mới cần thêm
         $quyTrinhMoi = [
             'trangthai' => $trangthai,
@@ -77,45 +139,215 @@ class VanDon
             'tenBC' => $tenBC,
             'diachiBC' => $diachiBC
         ];
-
+    
         // Tìm và cập nhật vận đơn với idVD cụ thể
         $result = $collection->updateOne(
-            ['idVD' => $idVD],
-            ['$push' => ['quyTrinhVC' => $quyTrinhMoi]]
+            ['idVD' => (int)$idVD], // Điều kiện tìm tài liệu
+            ['$push' => ['quyTrinhVC' => $quyTrinhMoi]] // Thêm quy trình mới vào mảng quyTrinhVC
         );
-
+    
         // Kiểm tra kết quả cập nhật
-        if ($result->getModifiedCount() == 1) {
-            return "Thêm quy trình vận chuyển thành công!";
+        if ($result->getMatchedCount() == 0) {
+            return "Vận đơn không tồn tại!";
+        } elseif ($result->getModifiedCount() == 0) {
+            return "Quy trình vận chuyển đã tồn tại hoặc không có thay đổi nào!";
         } else {
-            return "Thêm quy trình vận chuyển thất bại hoặc vận đơn không tồn tại!";
+            return "Thêm quy trình vận chuyển thành công!";
         }
     }
 
-    public static function getDonHangTrangThai($database,$idBuuCuc,$limit,$offset,$tinhtrang = null)
+    public static function VanChuyen($database, $idVD, $trangthai,$TenNhanVien, $idBC, $tenBC, $diachiBC)
+    {
+        $collection = $database->selectCollection('VanDon'); // Corrected the collection name to 'VanDon'
+    
+        if ($collection === null) {
+            die("Bộ sưu tập không tồn tại: VanDon");
+        }
+    
+        // Quy trình mới cần thêm
+        $quyTrinhMoi = [
+            'trangthai' => $trangthai,
+          
+            'tenNV' => $TenNhanVien,
+            'idBC' => $idBC,
+            'tenBC' => $tenBC,
+            'diachiBC' => $diachiBC
+        ];
+    
+        // Tìm và cập nhật vận đơn với idVD cụ thể
+        $result = $collection->updateOne(
+            ['idVD' => (int)$idVD], // Điều kiện tìm tài liệu
+            ['$push' => ['quyTrinhVC' => $quyTrinhMoi]] // Thêm quy trình mới vào mảng quyTrinhVC
+        );
+    
+        // Kiểm tra kết quả cập nhật
+        if ($result->getMatchedCount() == 0) {
+            return "Vận đơn không tồn tại!";
+        } elseif ($result->getModifiedCount() == 0) {
+            return "Quy trình vận chuyển đã tồn tại hoặc không có thay đổi nào!";
+        } else {
+            return "Thêm quy trình vận chuyển thành công!";
+        }
+    }
+
+    public static function LayHang_Shipper($database, $idVD, $trangthai, $idNhanVien,$TenNhanVien, $idBC, $tenBC, $diachiBC)
+    {
+        $collection = $database->selectCollection('VanDon'); // Corrected the collection name to 'VanDon'
+    
+        if ($collection === null) {
+            die("Bộ sưu tập không tồn tại: VanDon");
+        }
+    
+        // Quy trình mới cần thêm
+        $quyTrinhMoi = [
+            'trangthai' => $trangthai,
+            'idNV' => $idNhanVien,
+            'tenNV' => $TenNhanVien,
+            'idBC' => $idBC,
+            'tenBC' => $tenBC,
+            'diachiBC' => $diachiBC
+        ];
+    
+        // Tìm và cập nhật vận đơn với idVD cụ thể
+        $result = $collection->updateOne(
+            ['idVD' => (int)$idVD], // Điều kiện tìm tài liệu
+            ['$push' => ['quyTrinhVC' => $quyTrinhMoi]] // Thêm quy trình mới vào mảng quyTrinhVC
+        );
+    
+        // Kiểm tra kết quả cập nhật
+        if ($result->getMatchedCount() == 0) {
+            return "Vận đơn không tồn tại!";
+        } elseif ($result->getModifiedCount() == 0) {
+            return "Quy trình vận chuyển đã tồn tại hoặc không có thay đổi nào!";
+        } else {
+            return "Thêm quy trình vận chuyển thành công!";
+        }
+    }
+
+    // public static function getDonHangTrangThai($database,$idBuuCuc,$limit,$offset,$tinhtrang = null)
+    // {
+    //     $collection = $database->VanDon;
+    //     // Truy vấn tìm các đơn hàng có trạng thái "Chờ xác nhận" trong quy trình vận chuyển
+    //     $query = [
+    //         'quyTrinhVC.0.trangthai' => $tinhtrang,
+    //         'quyTrinhVC.idBC' => $idBuuCuc
+    //     ];
+
+    //     $options = [
+    //         'limit' => $limit,
+    //         'skip' => $offset,
+    //         'projection' => ['_id' => 0] // Không lấy trường _id, có thể điều chỉnh theo nhu cầu
+    //     ];
+
+    //     $cursor = $collection->find($query, $options);
+    //     $results = [];
+
+    //     foreach ($cursor as $document) {
+    //         $results[] = $document;
+    //     }
+
+    //     return $results;
+    // }
+
+    public static function getDonHangTrangThai($database, $idBuuCuc, $limit, $offset, $tinhtrang = null)
     {
         $collection = $database->VanDon;
-        // Truy vấn tìm các đơn hàng có trạng thái "Chờ xác nhận" trong quy trình vận chuyển
-        $query = [
-            'quyTrinhVC.0.trangthai' => $tinhtrang,
-            'quyTrinhVC.idBC' => $idBuuCuc
+    
+        // Sử dụng Aggregation Framework để lọc quy trình vận chuyển cuối cùng
+        $pipeline = [
+            [
+                '$project' => [
+                    'idVD' => 1,
+                    'nguoiNhan' => 1,
+                    'thoiGianHenLay' => 1,
+                    'thoiGianHenGiao' => 1,
+                    'loaiHang' => 1,
+                    'tinhTrang' => 1,
+                    'quyTrinhVC' => 1,
+                    'ngayTao' => 1,
+                    'hangHoa.trongLuong' => 1,
+                    'lastStatus' => [
+                        '$arrayElemAt' => ['$quyTrinhVC', -1] // Lấy phần tử cuối cùng trong mảng quyTrinhVC
+                    ]
+                ]
+            ],
+            [
+                '$match' => [
+                    'lastStatus.trangthai' => $tinhtrang,
+                    'lastStatus.idBC' => $idBuuCuc
+                ]
+            ],
+            [
+                '$skip' => $offset
+            ],
+            [
+                '$limit' => $limit
+            ],
+            [
+                '$project' => ['_id' => 0] // Không lấy trường _id, có thể điều chỉnh theo nhu cầu
+            ]
         ];
-
-        $options = [
-            'limit' => $limit,
-            'skip' => $offset,
-            'projection' => ['_id' => 0] // Không lấy trường _id, có thể điều chỉnh theo nhu cầu
-        ];
-
-        $cursor = $collection->find($query, $options);
+    
+        $cursor = $collection->aggregate($pipeline);
         $results = [];
-
+    
         foreach ($cursor as $document) {
             $results[] = $document;
         }
-
         return $results;
     }
+    
+    public static function getDonHang_Shipper($database, $idBuuCuc,$idShipper, $limit, $offset, $tinhtrang = null)
+    {
+        $collection = $database->VanDon;
+    
+        // Sử dụng Aggregation Framework để lọc quy trình vận chuyển cuối cùng
+        $pipeline = [
+            [
+                '$project' => [
+                    'idVD' => 1,
+                    'idKhachHang' => 1,
+                    'nguoiNhan' => 1,
+                    'thoiGianHenLay' => 1,
+                    'thoiGianHenGiao' => 1,
+                    'loaiHang' => 1,
+                    'tinhTrang' => 1,
+                    'quyTrinhVC' => 1,
+                    'ngayTao' => 1,
+                    'hangHoa.trongLuong' => 1,
+                    'lastStatus' => [
+                        '$arrayElemAt' => ['$quyTrinhVC', -1] // Lấy phần tử cuối cùng trong mảng quyTrinhVC
+                    ]
+                ]
+            ],
+            [
+                '$match' => [
+                    'lastStatus.trangthai' => $tinhtrang,
+                    'lastStatus.idNV' => $idShipper,
+                    'quyTrinhVC.idBC' => $idBuuCuc
+                ]
+            ],
+            [
+                '$skip' => $offset
+            ],
+            [
+                '$limit' => $limit
+            ],
+            [
+                '$project' => ['_id' => 0] // Không lấy trường _id, có thể điều chỉnh theo nhu cầu
+            ]
+        ];
+    
+        $cursor = $collection->aggregate($pipeline);
+        $results = [];
+    
+        foreach ($cursor as $document) {
+            $results[] = $document;
+        }
+    
+        return $results;
+    }
+
     // -------------------------------------------------------------------------------------------------------------------------------------
     public static function xacDinhKieuVanChuyen($tinhGui, $tinhNhan)
     {

@@ -157,8 +157,18 @@ $kh = KhachHang::getUserById($pdo,$_SESSION['logged_id']);
                                         </a>
                                     </li>
                                     <li>
-                                        <a href="icon-menu.html">
-                                            <span class="sub-item">Danh sách người nhận</span>
+                                        <a href="QuanLyDon_NhanVien.php">
+                                            <span class="sub-item">Quản lý Đơn Nhân viên</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="QuanLyDon_NhanVien_BuuCucGui.php">
+                                            <span class="sub-item">Quản lý Đơn Bưu cục gửi</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="QuanLyDon_Shipper.php">
+                                            <span class="sub-item">Quản lý Đơn Shipper</span>
                                         </a>
                                     </li>
                                 </ul>
@@ -315,26 +325,7 @@ $kh = KhachHang::getUserById($pdo,$_SESSION['logged_id']);
 
         <div class="main-panel">
             <div class="main-header">
-                <div class="main-header-logo">
-                    <!-- Logo Header -->
-                    <div class="logo-header" data-background-color="dark">
-                        <a href="index.html" class="logo">
-                            <img src="assets/img/kaiadmin/logo_light.svg" alt="navbar brand" class="navbar-brand" height="20" />
-                        </a>
-                        <div class="nav-toggle">
-                            <button class="btn btn-toggle toggle-sidebar">
-                                <i class="gg-menu-right"></i>
-                            </button>
-                            <button class="btn btn-toggle sidenav-toggler">
-                                <i class="gg-menu-left"></i>
-                            </button>
-                        </div>
-                        <button class="topbar-toggler more">
-                            <i class="gg-more-vertical-alt"></i>
-                        </button>
-                    </div>
-                    <!-- End Logo Header -->
-                </div>
+                
                 <!-- Navbar Header -->
                 <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
                     <div class="container-fluid">
@@ -417,7 +408,7 @@ $kh = KhachHang::getUserById($pdo,$_SESSION['logged_id']);
                                                 <?php if (isset($_SESSION['logged_name'])) : ?>
                                                     <div class="u-text">
                                                         <h4><?= $_SESSION['logged_name'] ?></h4>
-                                                        <p class="text-muted"><?=  $kh['email']  ?></p>
+                                                        <!-- <p class="text-muted"><?=  $kh['email']  ?></p> -->
                                                         <a href="profile.html" class="btn btn-xs btn-secondary btn-sm">View Profile</a>
                                                     </div>
                                                 <?php endif; ?>

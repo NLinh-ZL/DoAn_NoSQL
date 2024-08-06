@@ -49,7 +49,7 @@ require_once "class/BuuCuc.php";
                     $_SESSION['logged_id'] = $us->idNV;
                     $_SESSION['logged_chucvu'] = $us->chucVu;
                 }
-                
+                header("Location: index.php");
                 // if ($_SESSION['logged_role'] == "1") {
                 //     header("Location: admin.php");
                 //     exit;
