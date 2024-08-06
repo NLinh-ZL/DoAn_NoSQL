@@ -39,7 +39,7 @@ require_once "class/Database.php";
 require "class/KhachHang.php";
 $db = new Database();
 $pdo = $db->getConnect();
-$kh = KhachHang::getUserById($pdo,$_SESSION['logged_id']);
+$kh = KhachHang::getUserById($pdo, $_SESSION['logged_id']);
 ?>
 
 <body>
@@ -146,71 +146,41 @@ $kh = KhachHang::getUserById($pdo,$_SESSION['logged_id']);
                             </a>
                             <div class="collapse" id="sidebarLayouts">
                                 <ul class="nav nav-collapse">
-                                    <li>
-                                        <a href="QuanLyDon.php">
-                                            <span class="sub-item">Quản lý vận đơn</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="icon-menu.html">
-                                            <span class="sub-item">Đơn cần xử lý</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="QuanLyDon_NhanVien.php">
-                                            <span class="sub-item">Quản lý Đơn Nhân viên</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="QuanLyDon_NhanVien_BuuCucGui.php">
-                                            <span class="sub-item">Quản lý Đơn Bưu cục gửi</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="QuanLyDon_Shipper.php">
-                                            <span class="sub-item">Quản lý Đơn Shipper</span>
-                                        </a>
-                                    </li>
+                                    <?php $role = $_SESSION['logged_role'];
+                                    if ($role === 0) : ?>
+                                        <li>
+                                            <a href="QuanLyDon.php">
+                                                <span class="sub-item">Quản lý vận đơn</span>
+                                            </a>
+                                        </li>
+                                    <?php else : ?>
+                                        <?php $chucvu = $_SESSION['logged_chucvu'];
+                                        if ($chucvu === 'Nhân viên') : ?>
+                                            <li>
+                                                <a href="QuanLyDon_NhanVien.php">
+                                                    <span class="sub-item">Quản lý Đơn Nhân viên</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="QuanLyDon_NhanVien_BuuCucGui.php">
+                                                    <span class="sub-item">Quản lý Đơn Bưu cục gửi</span>
+                                                </a>
+                                            </li>
+                                        <?php elseif ($chucvu === 'Shipper') : ?>
+
+                                            <li>
+                                                <a href="QuanLyDon_Shipper.php">
+                                                    <span class="sub-item">Quản lý Đơn Shipper</span>
+                                                </a>
+                                            </li>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+
+                                 
                                 </ul>
                             </div>
                         </li>
-                        <li class="nav-item">
-                            <a data-bs-toggle="collapse" href="#forms">
-                                <i class="fas fa-pen-square"></i>
-                                <p>Forms</p>
-                                <span class="caret"></span>
-                            </a>
-                            <div class="collapse" id="forms">
-                                <ul class="nav nav-collapse">
-                                    <li>
-                                        <a href="forms/forms.html">
-                                            <span class="sub-item">Basic Form</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </li>
-                        <li class="nav-item">
-                            <a data-bs-toggle="collapse" href="#tables">
-                                <i class="fas fa-table"></i>
-                                <p>Tables</p>
-                                <span class="caret"></span>
-                            </a>
-                            <div class="collapse" id="tables">
-                                <ul class="nav nav-collapse">
-                                    <li>
-                                        <a href="tables/tables.html">
-                                            <span class="sub-item">Basic Table</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="tables/datatables.html">
-                                            <span class="sub-item">Datatables</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </li>
+                      
                         <li class="nav-item">
                             <a data-bs-toggle="collapse" href="#maps">
                                 <i class="fas fa-map-marker-alt"></i>
@@ -220,113 +190,31 @@ $kh = KhachHang::getUserById($pdo,$_SESSION['logged_id']);
                             <div class="collapse" id="maps">
                                 <ul class="nav nav-collapse">
                                     <li>
-                                        <a href="maps/googlemaps.html">
-                                            <span class="sub-item">Tra cứu bưu cục</span>
+                                        <a href="ChiTiet_DonHang.php">
+                                            <span class="sub-item">Tra cứu vận đơn</span>
                                         </a>
                                     </li>
-                                    <li>
+                                    <!-- <li>
                                         <a href="maps/jsvectormap.html">
                                             <span class="sub-item">Ước tính cước phí</span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                 </ul>
                             </div>
                         </li>
-                        <li class="nav-item">
-                            <a data-bs-toggle="collapse" href="#charts">
-                                <i class="far fa-chart-bar"></i>
-                                <p>Charts</p>
-                                <span class="caret"></span>
-                            </a>
-                            <div class="collapse" id="charts">
-                                <ul class="nav nav-collapse">
-                                    <li>
-                                        <a href="charts/charts.html">
-                                            <span class="sub-item">Chart Js</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="charts/sparkline.html">
-                                            <span class="sub-item">Sparkline</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </li>
-                        <li class="nav-item">
-                            <a href="widgets.html">
-                                <i class="fas fa-desktop"></i>
-                                <p>Widgets</p>
-                                <span class="badge badge-success">4</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="../../documentation/index.html">
-                                <i class="fas fa-file"></i>
-                                <p>Documentation</p>
-                                <span class="badge badge-secondary">1</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a data-bs-toggle="collapse" href="#submenu">
-                                <i class="fas fa-bars"></i>
-                                <p>Menu Levels</p>
-                                <span class="caret"></span>
-                            </a>
-                            <div class="collapse" id="submenu">
-                                <ul class="nav nav-collapse">
-                                    <li>
-                                        <a data-bs-toggle="collapse" href="#subnav1">
-                                            <span class="sub-item">Level 1</span>
-                                            <span class="caret"></span>
-                                        </a>
-                                        <div class="collapse" id="subnav1">
-                                            <ul class="nav nav-collapse subnav">
-                                                <li>
-                                                    <a href="#">
-                                                        <span class="sub-item">Level 2</span>
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a href="#">
-                                                        <span class="sub-item">Level 2</span>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <a data-bs-toggle="collapse" href="#subnav2">
-                                            <span class="sub-item">Level 1</span>
-                                            <span class="caret"></span>
-                                        </a>
-                                        <div class="collapse" id="subnav2">
-                                            <ul class="nav nav-collapse subnav">
-                                                <li>
-                                                    <a href="#">
-                                                        <span class="sub-item">Level 2</span>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <a href="#">
-                                            <span class="sub-item">Level 1</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </li>
+                       
+                       
+                        
+                      
                     </ul>
                 </div>
             </div>
         </div>
 
         <div class="main-panel">
-            <div class="main-header">
+            <!-- <div class="main-header">
                 
-                <!-- Navbar Header -->
+               
                 <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
                     <div class="container-fluid">
                         <nav class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
@@ -408,7 +296,6 @@ $kh = KhachHang::getUserById($pdo,$_SESSION['logged_id']);
                                                 <?php if (isset($_SESSION['logged_name'])) : ?>
                                                     <div class="u-text">
                                                         <h4><?= $_SESSION['logged_name'] ?></h4>
-                                                        <!-- <p class="text-muted"><?=  $kh['email']  ?></p> -->
                                                         <a href="profile.html" class="btn btn-xs btn-secondary btn-sm">View Profile</a>
                                                     </div>
                                                 <?php endif; ?>
@@ -433,5 +320,5 @@ $kh = KhachHang::getUserById($pdo,$_SESSION['logged_id']);
                         </ul>
                     </div>
                 </nav>
-                <!-- End Navbar -->
-            </div>
+               
+            </div> -->

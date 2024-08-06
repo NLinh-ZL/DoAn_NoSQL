@@ -1,5 +1,5 @@
 <?php
-require_once "inc/header.php";
+require_once "inc/header1.php";
 ?>
 <!-- =============================================================================================== -->
 <?php
@@ -57,16 +57,18 @@ if (isset($vanDon['tinhChatHang']) && $vanDon['tinhChatHang'] instanceof MongoDB
 </style>
 
 <section class="contact-section" style="background-color: #F8F8FF">
-    <div class="container">
+    <div class="container" style="margin:100px">
 
         <div class="row">
-            <div class="col-12 text-center">
-                <div class="large-text">CHI TIẾT VẬN ĐƠN</div>
-            </div>
+
             <div class="col-lg-8">
+
                 <form class="form-contact contact_form" action="#">
 
                     <div class="card form-group box-sender">
+                        <div class="col-12 text-center">
+                            <div class="large-text">Chi tiết vận đơn</div>
+                        </div>
                         <div class="card-body">
 
                             <div class="row no-gutters">

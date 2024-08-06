@@ -48,28 +48,7 @@ $pdo = $db->getConnect();
     <!-- Header Start -->
     <div class="header-area">
         <div class="main-header ">
-            <div class="header-top d-none d-lg-block">
-                <div class="container">
-                    <div class="col-xl-12">
-                        <div class="row d-flex justify-content-between align-items-center">
-                            <div class="header-info-left">
-                                <ul>     
-                                    <li>Phone: +99 (0) 101 0000 888</li>
-                                    <li>Email: noreply@yourdomain.com</li>
-                                </ul>
-                            </div>
-                            <div class="header-info-right">
-                                <ul class="header-social">    
-                                    <li><a href="#"><i class="fab fa-twitter"></i></a></li>
-                                    <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
-                                    <li><a href="#"><i class="fab fa-linkedin-in"></i></a></li>
-                                    <li> <a href="#"><i class="fab fa-google-plus-g"></i></a></li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+           
             <div class="header-bottom  header-sticky">
                 <div class="container">
                     <div class="row align-items-center">

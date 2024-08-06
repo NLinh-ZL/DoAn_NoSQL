@@ -34,20 +34,13 @@ $total_pages_ChoXacNhan = VanDon::countAllBuuCuc($pdo,$NhanVienDangNhap['idBC'],
 $total_pages_DangLay = VanDon::countAllBuuCuc($pdo,$NhanVienDangNhap['idBC'], $limit, 'Đang lấy');
 $total_pages_ChuyenDenBC = VanDon::countAllBuuCuc($pdo,$NhanVienDangNhap['idBC'], $limit, 'Chuyển đến bưu cục');
 $total_pages_VanChuyen = VanDon::countAllBuuCuc($pdo,$NhanVienDangNhap['idBC'], $limit, 'Đã nhận hàng');
-$total_pages_HuyGiao = VanDon::countAllBuuCuc($pdo,$NhanVienDangNhap['idBC'], $limit, 'Hủy giao');
+$total_pages_HuyGiao = VanDon::countAllBuuCuc($pdo,$NhanVienDangNhap['idBC'], $limit, 'Hủy giao hàng');
 
 // $totalDocuments = VanDon::countTotalDocuments($pdo);
 
 // $idKhachHang = 4;
 $customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHang]);
-// $TongDon = $collection->find(['idKhachHang' => $idKhachHang]);
-// $GiaoThanhCong = $collection->find(['idKhachHang' => $idKhachHang, 'tinhTrang' => 'Giao hàng thành công']);
-// $HuyGiao = $collection->find(['idKhachHang' => $idKhachHang, 'tinhTrang' => 'Hủy giao']);
-// $DangGiao = $collection->find(['idKhachHang' => $idKhachHang, 'tinhTrang' => 'Đang giao']);
-// $TongDon = VanDon::getAllpage($pdo, $limit, $offset);
-// $GiaoThanhCong = VanDon::getAllpage($pdo, $limit, $offset, 'Giao hàng thành công');
-// $HuyGiao = VanDon::getAllpage($pdo, $limit, $offset, 'Hủy giao');
-// $DangGiao = VanDon::getAllpage($pdo, $limit, $offset, 'Đang giao');
+
 // Lấy nhân viên giao hàng
 $deliveryStaff = BuuCuc::getAllDeliveryStaff($pdo,$NhanVienDangNhap['idBC']);
 
@@ -70,9 +63,8 @@ if (isset($_GET['action']) && isset($_GET['idVD'])) {
         header("Location: QuanLyDon_NhanVien.php?active=LayThanhCong&page=" . urlencode($page));
         exit();
     } else if ($action == 'huyhang') {
-        VanDon::LayHang_Shipper($pdo, $idVD, 'Hủy nhận hàng', $NhanVienDangNhap['idNV'], $NhanVienDangNhap['idBC'], $NhanVienDangNhap['hoTen'], $NhanVienDangNhap['tenBC'], $NhanVienDangNhap['diaChi']);
-        // header("Location: QuanLyDon_NhanVien.php?page=1&active=LayThanhCong");
-        // exit();
+        VanDon::LayHang_Shipper($pdo, $idVD, 'Giao hàng thất bại', $NhanVienDangNhap['idNV'], $NhanVienDangNhap['idBC'], $NhanVienDangNhap['hoTen'], $NhanVienDangNhap['tenBC'], $NhanVienDangNhap['diaChi']);
+        VanDon::updateTrangThaiVanDon($pdo, $idVD, 'Giao hàng thất bại');
     } else if ($action == 'chuyenhang') {
         if (isset($_GET['idBC'])) {
             $idBC = $_GET['idBC'];
@@ -254,7 +246,7 @@ ob_end_flush();
                                             <path d="M21.6804 15.82C20.7904 14.93 19.6104 14.48 18.4404 14.5C17.3104 14.51 16.1804 14.96 15.3204 15.82C14.7204 16.41 14.3304 17.15 14.1404 17.92C14.0304 18.34 13.9904 18.77 14.0204 19.2V19.25C14.0204 19.32 14.0304 19.38 14.0404 19.46C14.0404 19.46 14.0404 19.46 14.0504 19.47V19.5C14.1404 20.48 14.5604 21.43 15.3204 22.18C16.4804 23.34 18.1104 23.73 19.5804 23.36C20.0204 23.25 20.4504 23.07 20.8504 22.83C21.1504 22.66 21.4304 22.44 21.6804 22.18C22.4304 21.43 22.8604 20.48 22.9504 19.49C22.9604 19.49 22.9604 19.47 22.9604 19.46C22.9804 19.39 22.9804 19.31 22.9804 19.24C22.9804 19.23 22.9904 19.21 22.9904 19.19C23.0504 17.98 22.6104 16.74 21.6804 15.82ZM20.2304 20.71C19.9404 21 19.4704 21 19.1704 20.71L18.5104 20.05L17.8304 20.73C17.5304 21.03 17.0604 21.03 16.7704 20.73C16.4704 20.44 16.4704 19.97 16.7704 19.67L17.4504 18.99L16.7904 18.33C16.5004 18.03 16.5004 17.56 16.7904 17.27C17.0904 16.97 17.5604 16.97 17.8604 17.27L18.5104 17.93L19.1404 17.29C19.4404 17 19.9104 17 20.2104 17.29C20.5004 17.59 20.5004 18.06 20.2104 18.36L19.5704 18.99L20.2304 19.64C20.5304 19.94 20.5304 20.41 20.2304 20.71Z" fill="#CECECE"></path>
                                         </svg>
 
-                                        Hủy Giao
+                                        Giao hàng thất bại
                                     </h5>
                                     <!-- <h6 style="color: #000;"><?= ($customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHang, 'quyTrinhVC.trangthai' => 'Hủy giao'])) ?> đơn hàng</h6> -->
                                 </a>
@@ -266,14 +258,7 @@ ob_end_flush();
                         <div class="tab-content mt-2 mb-3" id="pills-tabContent" style="border-top: 3px solid #dc3545;">
 
                             <style>
-                                .card-header {
-                                    display: flex;
-                                    /* Sử dụng Flexbox để các phần tử nằm trên cùng một dòng */
-                                    flex-wrap: wrap;
-                                    /* Cho phép các phần tử xuống dòng nếu không đủ chỗ */
-                                    gap: 10px;
-                                    /* Khoảng cách giữa các phần tử */
-                                }
+                             
 
                                 .switch-wrap {
                                     display: flex;
@@ -518,7 +503,9 @@ ob_end_flush();
                                                         $page = $active !== 'Vanchuyen' ? 1 : ($_GET['page']); ?>" id="pills-Vanchuyen" role="tabpanel" aria-labelledby="pills-Vanchuyen-tab">
                                 <form action="QuanLyDon_NhanVien.php?page=<?= $page  ?>&active=Vanchuyen" method="post">
 
-                                    <div class="card-header">
+                                    <div class="card-header" style="display: flex;
+                                    flex-wrap: wrap;
+                                    gap: 10px;">
                                         <?php foreach ($buucuc as $BuuCuc) : ?>
                                             <div class="switch-wrap ">
                                                 <div class="primary-checkbox  ">
@@ -636,7 +623,7 @@ ob_end_flush();
                                         $STT = 1;
                                         $offset = ($page - 1) * $limit;
 
-                                        $Huygiao = VanDon::getDonHangTrangThai($pdo, $NhanVienDangNhap['idBC'], $limit, $offset, 'Hủy nhận hàng');
+                                        $Huygiao = VanDon::getDonHangTrangThai($pdo, $NhanVienDangNhap['idBC'], $limit, $offset, 'Giao hàng thất bại');
                                         foreach ($Huygiao as $order) :
                                             $tongKhoiLuong = 0;
                                             foreach ($order['hangHoa'] as $hang) {
