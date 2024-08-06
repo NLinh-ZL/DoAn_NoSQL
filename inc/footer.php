@@ -61,8 +61,8 @@
                     <div class="col-xl-3 col-lg-4 col-md-5 col-sm-6">
                         <div class="single-footer-caption mb-50">
                             <!-- logo -->
-                            <div class="footer-logo">
-                                <a href="index.html"><img src="inc/assets/img/logo/logo2_footer.png" alt=""></a>
+                            <div class="footer-logo" style="margin-bottom: 5px;">
+                                <a href="index.html"><img src="https://viettelpost.vn/assets/images/logo-20210202.png" height="120"  style="margin-top:5px;" alt=""></a>
                             </div>
                             <div class="footer-tittle">
                                 <div class="footer-pera">

@@ -3,6 +3,12 @@ require_once "inc/header.php";
 ?>
 <!-- =============================================================================================== -->
 <?php
+if(isset($_SESSION['logged_role']) && $_SESSION['logged_role'] === 0) {
+?>
+
+<!-- =============================================================================================== -->
+
+<?php
 require_once "class/KhachHang.php";
 require_once "class/VanDon.php";
 require_once "class/API.php";
@@ -743,6 +749,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         document.getElementById('sonha').addEventListener('input', updateAddress);
     });
 </script>
+
+<!-- =============================================================================================== -->
+<?php
+} else {
+    header("Location: dangky.php");
+    exit;
+}
+?>
 
 <!-- =============================================================================================== -->
 <?php

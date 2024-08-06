@@ -351,7 +351,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             <option value="Quản lý" <?= isset($chucvu) && $chucvu == 'Quản lý' ? 'selected' : '' ?>>Quản lý</option>
                                             <option value="Nhân viên" <?= isset($chucvu) && $chucvu == 'Nhân viên' ? 'selected' : '' ?>>Nhân viên</option>
                                             <option value="Shipper" <?= isset($chucvu) && $chucvu == 'Shipper' ? 'selected' : '' ?>>Shipper</option>
-                                            <option value="Nhân viên kho" <?= isset($chucvu) && $chucvu == 'Nhân viên kho' ? 'selected' : '' ?>>Nhân viên kho</option>
                                         </select>
                                         <span class="text-danger"><?= $chucvuError ?></span>
                                     </div>
