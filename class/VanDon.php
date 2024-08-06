@@ -206,7 +206,7 @@ class VanDon
         return (int)$phiCuoiCung;
     }
 
-    public static function themDonHang($pdo, $idKHGui, $thoiGianHenLay, $hoTenNguoiNhan, $sdtNguoiNhan, $diaChiNguoiNhan, $thanhPho, $quan, $phuong, $duong, $thoiGianHenGiao, $loaiHangHoa, $items, $tinhChatHangHoaDacBiet, $nguoiTraCuoc, $cuoc, $tienThuHo, $loaiVanChuyen, $ghiChu, $quyTrinhVC)
+    public static function themDonHang($pdo, $idKHGui, $thoiGianHenLay, $hoTenNguoiNhan, $sdtNguoiNhan, $diaChiNguoiNhan, $thanhPho, $quan, $phuong, $duong, $thoiGianHenGiao, $loaiHangHoa, $items, $tinhChatHangHoaDacBiet, $nguoiTraCuoc, $cuoc, $tienThuHo, $loaiVanChuyen, $ghiChu, $quyTrinhVC, $tinhTrangCuoc)
     {
         $collection = $pdo->VanDon;
 
@@ -233,7 +233,7 @@ class VanDon
             'tinhChatHang' => $tinhChatHangHoaDacBiet,
             'ngTraCuoc' => $nguoiTraCuoc,
             'tienCuoc' => $cuoc,
-            'tinhTrangCuoc' => 'Chưa thanh toán',
+            'tinhTrangCuoc' => $tinhTrangCuoc,
             'thuHo' => $tienThuHo,
             'loaiVanChuyen' => $loaiVanChuyen,
             'ghiChu' => $ghiChu,

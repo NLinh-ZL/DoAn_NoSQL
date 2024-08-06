@@ -373,7 +373,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                                         <label class="form-label my-1" style="font-size: 16px;">Địa chỉ:</label>
                                         <input class="form-control" style="border: 1px solid #ff5f13;" type="text" name="diachi_display" id="diachi_display" placeholder="Hãy nhập các trường bên dưới, để tạo ra địa chỉ" value="<?= $diaChiNguoiNhan ?>" disabled>
-                                        <input type="hidden" name="diachi" id="diachi" value="<?= $diaChiNguoiNhan?>">
+                                        <input type="hidden" name="diachi" id="diachi" value="<?= $diaChiNguoiNhan ?>">
                                         <span class="text-danger"><?= $diaChiNguoiNhanError ?></span>
 
                                         <div class="row">
@@ -567,7 +567,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                                 <div style="font-size: 17px; font-weight:600;">Loại vận chuyển</div>
                                                 <div>
                                                     <div class="form-check m-2">
-                                                        <input class="form-check-input" type="radio" name="loaivanchuyen" id="loaivanchuyen" value="Bình thường" <?php if (isset($loaiVanChuyen) && $loaiVanChuyen == 'Bình thường') echo 'checked'; ?>  style="width: 15px; height: 15px;">
+                                                        <input class="form-check-input" type="radio" name="loaivanchuyen" id="loaivanchuyen" value="Bình thường" <?php if (isset($loaiVanChuyen) && $loaiVanChuyen == 'Bình thường') echo 'checked'; ?> style="width: 15px; height: 15px;">
                                                         <label class="form-check-label" for="loaivanchuyen" style="font-size: 15px;">
                                                             Bình thường
                                                         </label>
@@ -620,8 +620,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
 
             </div>
-        </div>
-
         </div>
     </section>
 
@@ -744,43 +742,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         document.getElementById('duong').addEventListener('input', updateAddress);
         document.getElementById('sonha').addEventListener('input', updateAddress);
     });
-
-    //Hiển thị quận khi chọn thành phố=======================================================
-    // document.addEventListener('DOMContentLoaded', function() {
-    //     const citySelect = document.getElementById('thanhpho');
-    //     const districtSelect = document.getElementById('quan');
-
-    //     citySelect.addEventListener('change', function() {
-    //         const city = citySelect.value;
-
-    //         if (city) {
-    //             fetch(`get_districts.php?city=${encodeURIComponent(city)}`)
-    //                 .then(response => response.json())
-    //                 .then(districts => {
-    //                     // Xóa tất cả các option cũ
-    //                     districtSelect.innerHTML = '';
-
-    //                     // Thêm một option mặc định
-    //                     const defaultOption = document.createElement('option');
-    //                     defaultOption.text = 'Chọn quận';
-    //                     defaultOption.value = '';
-    //                     districtSelect.add(defaultOption);
-
-    //                     // Thêm các quận mới vào danh sách
-    //                     districts.forEach(district => {
-    //                         const option = document.createElement('option');
-    //                         option.text = district;
-    //                         option.value = district;
-    //                         districtSelect.add(option);
-    //                     });
-    //                 })
-    //                 .catch(error => console.error('Error fetching districts:', error));
-    //         } else {
-    //             // Xóa tất cả các option nếu không có thành phố được chọn
-    //             districtSelect.innerHTML = '<option value="">Chọn quận</option>';
-    //         }
-    //     });
-    // });
 </script>
 
 <!-- =============================================================================================== -->
