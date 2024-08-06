@@ -1,6 +1,7 @@
 <!doctype html>
 <?php ob_start(); ?>
 <html class="no-js" lang="zxx">
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
@@ -23,17 +24,18 @@
     <link rel="stylesheet" href="inc/assets/css/nice-select.css">
     <link rel="stylesheet" href="inc/assets/css/style.css">
 </head>
+
 <body>
-<?php 
-session_start();
-require_once "class/Database.php";
-$db = new Database();
-$pdo = $db->getConnect();
+    <?php
+    session_start();
+    require_once "class/Database.php";
+    $db = new Database();
+    $pdo = $db->getConnect();
 
-?>
+    ?>
 
-<!--? Preloader Start -->
-<!-- <div id="preloader-active">
+    <!--? Preloader Start -->
+    <!-- <div id="preloader-active">
     <div class="preloader d-flex align-items-center justify-content-center">
         <div class="preloader-inner position-relative">
             <div class="preloader-circle"></div>
@@ -100,15 +102,73 @@ $pdo = $db->getConnect();
                                     <a href="contact.html" class="btn header-btn">Get A Qoue</a>
                                 </div>
                             </div>
-                        </div> 
-                        <!-- Mobile Menu -->
-                        <div class="col-12">
-                            <div class="mobile_menu d-block d-lg-none"></div>
+                            <div class="col-xl-10 col-lg-10">
+                                <div class="menu-wrapper  d-flex align-items-center justify-content-end">
+                                    <!-- Main-menu -->
+                                    <div class="main-menu d-none d-lg-block">
+                                        <nav>
+                                            <ul id="navigation">
+                                                <?php if (isset($_SESSION['logged_name'])) : ?>
+
+                                                    <?php if ($_SESSION['logged_role']==1 &&$_SESSION['logged_chucvu']=="Quản lý") : ?>
+                                                        <li><a href="index.php">Trang chủ</a></li>
+                                                        <li><a href="QuanLyDon.php">Quản lý Đơn</a></li>
+                                                        <li><a href="#">Quản lý</a>
+                                                            <ul class="submenu">
+                                                                <li><a href="quanlynv.php">Quản Lý nhân viên</a></li>
+                                                                <li><a href="themnv.php">Thêm nhân viên</a></li>
+                                                            </ul>
+                                                        </li>
+                                                        <li><a href="#"><?= $_SESSION['logged_name']  ?></a>
+                                                            <ul class="submenu">
+                                                                <li><a href="dangxuat.php">Đăng xuất</a></li>
+                                                            </ul>
+                                                        </li>
+                                                    <?php endif; ?>
+
+                                                    <?php if ($_SESSION['logged_role']==1 &&$_SESSION['logged_chucvu']=="Nhân viên") : ?>
+                                                        <li><a href="index.php">Trang chủ</a></li>
+                                                        <li><a href="QuanLyDon.php">Quản lý Đơn</a></li>
+                                                        <li><a href="#"><?= $_SESSION['logged_name']  ?></a>
+                                                            <ul class="submenu">
+                                                                <li><a href="dangxuat.php">Đăng xuất</a></li>
+                                                            </ul>
+                                                        </li>
+                                                    <?php endif; ?>
+
+                                                    <?php if ($_SESSION['logged_role']==0) : ?>
+                                                        <li><a href="index.php">Trang chủ</a></li>
+                                                        <li><a href="taodon.php">Tạo đơn</a></li>
+                                                        <li><a href="#"><?= $_SESSION['logged_name']  ?></a>
+                                                            <ul class="submenu">
+                                                                <li><a href="dangxuat.php">Đăng xuất</a></li>
+                                                            </ul>
+                                                        </li>
+                                                    <?php endif; ?>
+
+                                                <?php else : ?>
+                                                    <li><a href="index.php">Trang chủ</a></li>
+                                                    <li><a href="taodon.php">Tạo đơn</a></li>
+                                                    <li><a href="#">Tài khoản</a>
+                                                        <ul class="submenu">
+                                                            <li><a href="dangnhap.php">Đăng nhập</a></li>
+                                                            <li><a href="dangky.php">Đăng ký</a></li>
+                                                        </ul>
+                                                    </li>
+                                                <?php endif; ?>
+                                            </ul>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Mobile Menu -->
+                            <div class="col-12">
+                                <div class="mobile_menu d-block d-lg-none"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <!-- Header End -->
-</header>
+        <!-- Header End -->
+    </header>

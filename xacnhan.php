@@ -18,6 +18,11 @@ $idus = $_SESSION['logged_id'];
 $us = KhachHang::getUserById($pdo, $idus);
 $hoTenGui = $us['hoTen'];
 
+if($orderData['nguoiTraCuoc']=='Người gửi')
+{
+    $ttc="Đã thanh toán";
+}
+
 // Kiểm tra xác nhận
 if (isset($_POST['confirm']) && $_POST['confirm'] == 'yes') {
 
@@ -42,7 +47,8 @@ if (isset($_POST['confirm']) && $_POST['confirm'] == 'yes') {
         $orderData['tienThuHo'],
         $orderData['loaiVanChuyen'],
         $orderData['ghiChu'],
-        $orderData['quyTrinhVC']
+        $orderData['quyTrinhVC'],
+        $ttc
     );
 
     // Xóa dữ liệu khỏi session sau khi đã lưu

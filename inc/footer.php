@@ -61,8 +61,8 @@
                     <div class="col-xl-3 col-lg-4 col-md-5 col-sm-6">
                         <div class="single-footer-caption mb-50">
                             <!-- logo -->
-                            <div class="footer-logo">
-                                <a href="index.html"><img src="inc/assets/img/logo/logo2_footer.png" alt=""></a>
+                            <div class="footer-logo" style="margin-bottom: 5px;">
+                                <a href="index.html"><img src="https://viettelpost.vn/assets/images/logo-20210202.png" height="120"  style="margin-top:5px;" alt=""></a>
                             </div>
                             <div class="footer-tittle">
                                 <div class="footer-pera">
@@ -86,8 +86,8 @@
                     <div class="col-lg-12">
                         <div class="footer-copy-right text-center">
                             <p><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-  Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="fa fa-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
-  <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. --></p>
+                                Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="fa fa-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+                                <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. --></p>
                         </div>
                     </div>
                 </div>
