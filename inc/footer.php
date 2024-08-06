@@ -12,7 +12,7 @@
                             </div>
                         </div>
                         <div class="col-xl-3 col-lg-4">
-                            <span class="contact-number f-right">+ 1 212-683-9756</span>
+                            <span class="contact-number f-right" style="color:#e03">+ 1 212-683-9756</span>
                         </div>
                     </div>
                 </div>
