@@ -53,7 +53,7 @@ class BuuCuc
         $collection = $pdo->selectCollection('BuuCuc');
 
         $idNV = self::autoId($pdo);
-        $role = "0";
+        $role = "1";
 
         $ngaySinhDate = new DateTime($ngaySinh);
         $ngaySinhMongo = new MongoDB\BSON\UTCDateTime($ngaySinhDate->getTimestamp() * 1000);
@@ -134,6 +134,43 @@ class BuuCuc
         return false;
     }
 
+    public static function isCCCDExists1($pdo, $CCCD)
+    {
+        // Chọn collection
+        $collection = $pdo->selectCollection('BuuCuc');
+
+        // Sử dụng aggregation pipeline để đếm số lượng tài liệu có nhân viên với CCCD trùng khớp
+        $pipeline = [
+            ['$unwind' => '$nhanVien'],
+            ['$match' => ['nhanVien.CCCD' => $CCCD]],
+            ['$group' => ['_id' => null, 'count' => ['$sum' => 1]]]
+        ];
+
+        $result = $collection->aggregate($pipeline)->toArray();
+
+        // Trả về true nếu số lượng tài liệu khớp >= 2, ngược lại false
+        return !empty($result) && $result[0]['count'] > 1;
+    }
+
+    public static function isEmailExists1($pdo, $email)
+    {
+        // Chọn collection
+        $collection = $pdo->selectCollection('BuuCuc');
+
+        // Sử dụng aggregation pipeline để đếm số lượng tài liệu có nhân viên với email trùng khớp
+        $pipeline = [
+            ['$unwind' => '$nhanVien'],
+            ['$match' => ['nhanVien.email' => $email]],
+            ['$group' => ['_id' => null, 'count' => ['$sum' => 1]]]
+        ];
+
+        $result = $collection->aggregate($pipeline)->toArray();
+
+        // Trả về true nếu số lượng tài liệu khớp >= 2, ngược lại false
+        return !empty($result) && $result[0]['count'] > 1;
+    }
+
+
     // Phương thức để lấy thông tin người dùng
     public static function getUser($pdo, $email, $password)
     {
@@ -203,7 +240,7 @@ class BuuCuc
             ['$sort' => $sort], // Sắp xếp
             ['$skip' => $skip], // Bỏ qua các tài liệu không cần thiết
             ['$limit' => $limit], // Giới hạn số tài liệu
-            ['$group' => ['_id' => '$_id', 'nhanVien' => ['$push' => '$nhanVien']]] // Tạo lại mảng nhân viên
+            ['$group' => ['_id' => '$id', 'nhanVien' => ['$push' => '$nhanVien']]] // Tạo lại mảng nhân viên
         ];
 
         // Kiểm tra pipeline trước khi thực hiện
@@ -322,5 +359,123 @@ class BuuCuc
         }
 
         return $deliveryStaff;
+    }
+
+    //Cập nhật nhân viên
+    public static function updateNhanVien($pdo, $idBC, $idNV, $hoTen, $gioiTinh, $ngaySinh, $diaChi, $SDT, $CCCD, $email, $chucVu)
+    {
+        // Kết nối đến cơ sở dữ liệu và collection
+        $collection = $pdo->selectCollection('BuuCuc'); // Thay 'BuuCuc' bằng tên collection của bạn
+
+        // Tạo mảng lọc để xác định bưu cục và nhân viên cần cập nhật
+        $filter = [
+            'idBC' => $idBC,
+            'nhanVien.idNV' => $idNV
+        ];
+
+        // Tạo mảng cập nhật với các trường thông tin nhân viên
+        $update = [
+            '$set' => [
+                'nhanVien.$.hoTen' => $hoTen,
+                'nhanVien.$.gioiTinh' => $gioiTinh,
+                'nhanVien.$.ngaySinh' => new MongoDB\BSON\UTCDateTime(strtotime($ngaySinh) * 1000),
+                'nhanVien.$.diaChi.diaChi' => $diaChi['diaChi'],
+                'nhanVien.$.diaChi.thanhPho' => $diaChi['thanhPho'],
+                'nhanVien.$.diaChi.quan' => $diaChi['quan'],
+                'nhanVien.$.diaChi.phuong' => $diaChi['phuong'],
+                'nhanVien.$.diaChi.duong' => $diaChi['duong'],
+                'nhanVien.$.SDT' => $SDT,
+                'nhanVien.$.CCCD' => $CCCD,
+                'nhanVien.$.email' => $email,
+                'nhanVien.$.chucVu' => $chucVu
+            ]
+        ];
+
+        // Thực hiện cập nhật trong MongoDB
+        $result = $collection->updateOne($filter, $update);
+
+        // Kiểm tra kết quả cập nhật
+        if ($result->getModifiedCount() > 0) {
+            echo "Cập nhật thành công!";
+        } else {
+            echo "Không có thay đổi nào được thực hiện hoặc bưu cục hoặc nhân viên không tồn tại.";
+        }
+    }
+
+
+    public static function getIdBuuCucByNhanVienId($pdo, $idNV)
+    {
+        // Chọn collection (tương tự như bảng trong SQL)
+        $collection = $pdo->selectCollection('BuuCuc');
+
+        // Tìm bưu cục có nhân viên với idNV cụ thể
+        $result = $collection->findOne(
+            ['nhanVien.idNV' => $idNV],
+            ['projection' => ['idBC' => 1]]
+        );
+
+        // Kiểm tra kết quả và trả về idBC nếu có, ngược lại trả về null
+        return $result ? $result['idBC'] : null;
+    }
+
+    // Xóa nhân viên
+    public static function deleteNhanVien($pdo, $idBC, $idNV)
+    {
+        // Kết nối đến cơ sở dữ liệu và collection
+        $collection = $pdo->selectCollection('BuuCuc'); // Thay 'BuuCuc' bằng tên collection của bạn
+
+        // Tạo mảng lọc để xác định bưu cục
+        $filter = [
+            'idBC' => $idBC
+        ];
+
+        // Tạo mảng cập nhật với toán tử $pull để loại bỏ nhân viên có idNV từ mảng nhanVien
+        $update = [
+            '$pull' => [
+                'nhanVien' => [
+                    'idNV' => $idNV
+                ]
+            ]
+        ];
+
+        // Thực hiện cập nhật trong MongoDB
+        $result = $collection->updateOne($filter, $update);
+
+        // // Kiểm tra kết quả cập nhật
+        // if ($result->getModifiedCount() > 0) {
+        //     echo "Xóa nhân viên thành công!";
+        // } else {
+        //     echo "Không có thay đổi nào được thực hiện hoặc bưu cục hoặc nhân viên không tồn tại.";
+        // }
+    }
+
+    public static function updatePassword($pdo, $idBC, $idNV, $newPassword) {
+        // Kết nối đến cơ sở dữ liệu và collection
+        $collection = $pdo->selectCollection('BuuCuc'); // Thay 'BuuCuc' bằng tên collection của bạn
+
+        // Tạo mảng lọc để xác định bưu cục và nhân viên cần cập nhật
+        $filter = [
+            'idBC' => $idBC,
+            'nhanVien.idNV' => $idNV
+        ];
+
+        $hashed_pass = password_hash($newPassword, PASSWORD_DEFAULT);
+
+        // Tạo mảng cập nhật với các trường thông tin nhân viên
+        $update = [
+            '$set' => [
+                'nhanVien.$.password' => $hashed_pass
+            ]
+        ];
+
+        // Thực hiện cập nhật trong MongoDB
+        $result = $collection->updateOne($filter, $update);
+
+        // Kiểm tra kết quả cập nhật
+        if ($result->getModifiedCount() > 0) {
+            echo "Cập nhật thành công!";
+        } else {
+            echo "Không có thay đổi nào được thực hiện hoặc bưu cục hoặc nhân viên không tồn tại.";
+        }
     }
 }

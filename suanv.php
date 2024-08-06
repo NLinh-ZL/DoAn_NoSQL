@@ -3,9 +3,48 @@ require_once "inc/header.php";
 ?>
 <!-- =============================================================================================== -->
 <?php
-require_once "class/KhachHang.php";
 require_once "class/API.php";
 require_once "class/BuuCuc.php";
+
+$idNV = isset($_GET['id']) ? (int) trim($_GET['id']) : null;
+
+$nhanVien = BuuCuc::getNhanVienById($pdo, $idNV);
+
+if ($nhanVien) {
+    // Điền thông tin vào các biến để sử dụng trong form
+    $hoten = $nhanVien['hoTen'];
+    $gioitinh = $nhanVien['gioiTinh'];
+    $email = $nhanVien['email'];
+    $ngaysinh = $nhanVien['ngaySinh'];
+    $sdt = $nhanVien['SDT'];
+    $diachi = $nhanVien['diaChi']['diaChi'];
+    $thanhpho = $nhanVien['diaChi']['thanhPho'];
+    $quan = $nhanVien['diaChi']['quan'];
+    $phuong = $nhanVien['diaChi']['phuong'];
+    $duong = $nhanVien['diaChi']['duong'];
+    $cccd = $nhanVien['CCCD'];
+    $chucvu = $nhanVien['chucVu'];
+    // $buucuc = $nhanVien['idBC'];
+}
+
+// Tìm vị trí của "Tân Hòa Đông" trong chuỗi địa chỉ
+$pos = strpos($diachi, $duong);
+
+if ($pos !== false) {
+    // Lấy phần đầu của chuỗi trước "Tân Hòa Đông"
+    $partBefore = substr($diachi, 0, $pos);
+} else {
+    // Nếu không tìm thấy "Tân Hòa Đông" trong chuỗi, trả về toàn bộ địa chỉ
+    $partBefore = $diachi;
+}
+
+$sonha= $partBefore;
+
+$ngaysinhDate = $ngaysinh->toDateTime();
+// Định dạng lại thành Y-m-d để có thể dùng cho input type="date"
+$ngaysinhFormatted = $ngaysinhDate->format('Y-m-d');
+
+$idBC=BuuCuc::getIdBuuCucByNhanVienId($pdo, $idNV);
 
 $vietnamProvinces = [
     'An Giang', 'Bạc Liêu', 'Bắc Cạn', 'Bắc Giang', 'Bắc Ninh', 'Bình Dương',
@@ -26,8 +65,6 @@ $vietnamProvinces = [
 $hotenError = '';
 $gioitinhError = '';
 $emailError = '';
-$passError = '';
-$passcfError = '';
 $ngaysinhError = '';
 $sdtError = '';
 $diachiError = '';
@@ -38,33 +75,13 @@ $duongError = '';
 $sonhaError = '';
 $cccdError = '';
 $chucvuError = '';
-$buucucError = '';
+// $buucucError = '';
 
-$hoten = '';
-$gioitinh = '';
-$email = '';
-$pass = '';
-$passcf = '';
-$ngaysinh = '';
-$sdt = '';
-$diachi = '';
-$thanhpho = '';
-$quan = '';
-$phuong = '';
-$duong = '';
-$sonha = '';
-$cccd = '';
-$chucvu = '';
-$buucuc = '';
-
-$buuCucs = BuuCuc::getAllBuuCuc($pdo);
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $hoten = $_POST['hoten'];
     $gioitinh = $_POST['gioitinh'];
     $email = $_POST['email'];
-    $pass = $_POST['pass'];
-    $passcf = $_POST['passcf'];
     $ngaysinh = $_POST['ngaysinh'];
     $sdt = $_POST['sdt'];
     $diachi = $_POST['diachi'];
@@ -75,16 +92,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sonha = $_POST['sonha'];
     $cccd = $_POST['cccd'];
     $chucvu = $_POST['chucvu'];
-    $buucuc = $_POST['buucuc'];
-    
+    // $buucuc = $_POST['buucuc'];
+
     // Kiểm tra họ tên
     if (empty($hoten)) {
         $hotenError = 'Hãy nhập họ tên';
-    }
-
-    // Kiểm tra họ tên
-    if (empty($buucuc)) {
-        $buucucError = 'Hãy chọn bưu cục';
     }
 
     // Kiểm tra giới tính
@@ -97,39 +109,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $emailError = 'Hãy nhập email';
     } elseif (!preg_match("/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/", $email)) {
         $emailError = 'Email không hợp lệ';
-    } elseif (BuuCuc::isEmailExists($pdo, $email)) {
+    } elseif (BuuCuc::isEmailExists1($pdo, $email)) {
         $emailError = 'Email đã tồn tại';
     }
 
-    // Kiểm tra mật khẩu
-    if (empty($pass)) {
-        $passError = 'Hãy nhập mật khẩu';
-    } elseif (!preg_match("/^.{8,}$/", $pass)) {
-        $passError = "Mật khẩu phải có ít nhất 8 ký tự";
-    }
-
-    // Kiểm tra xác nhận mật khẩu
-    if (empty($passcf)) {
-        $passcfError = 'Hãy nhập lại mật khẩu';
-    } elseif ($pass != $passcf) {
-        $passcfError = "Mật khẩu nhập lại không khớp";
-    }
 
     // Kiểm tra ngày sinh
     if (empty($ngaysinh)) {
         $ngaysinhError = 'Hãy nhập ngày sinh';
-    }else {
+    } else {
         // Chuyển đổi ngày sinh từ chuỗi thành đối tượng DateTime
         $ngaySinhDate = new DateTime($ngaysinh);
-        
+
         // Lấy ngày hiện tại
         $ngayHienTai = new DateTime();
-        
+
         // Tính toán tuổi
         $tuoi = $ngayHienTai->diff($ngaySinhDate)->y;
-    
+
         // Kiểm tra tuổi
-        if ($tuoi < 18 || $tuoi >100) {
+        if ($tuoi < 18 || $tuoi > 100) {
             $ngaysinhError = 'Tuổi của bạn phải lớn hơn 18 và nhỏ hơn 100';
         }
     }
@@ -175,7 +174,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $sdtError = 'Hãy nhập số điện thoại';
     } elseif (!preg_match("/^\d{12}$/", $cccd)) {
         $cccdError = 'Căn cước công dẫn phải là 12 số';
-    } elseif (BuuCuc::isCCCDExists($pdo, $cccd)) {
+    } elseif (BuuCuc::isCCCDExists1($pdo, $cccd)) {
         $cccdError = 'CCCD đã tồn tại';
     }
 
@@ -185,19 +184,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
     // Nếu không có lỗi nào, thêm khách hàng mới vào MongoDB
-    if ( empty($buucucError) && empty($cccdError) && empty($chucvuError) && empty($hotenError) && empty($gioitinhError) && empty($emailError) && empty($passError) && empty($passcfError) && empty($ngaysinhError) && empty($sdtError) && empty($diachiError) && empty($thanhphoError) && empty($quanError) && empty($phuongError) && empty($duongError)) {
-        $hashed_pass = password_hash($pass, PASSWORD_DEFAULT);
-
-        // Thêm khách hàng mới vào MongoDB
-        BuuCuc::addNhanVien($pdo, $buucuc, $hoten, $gioitinh, $ngaysinh, [
-            'diachi' => $diachi,
-            'thanhpho' => $thanhpho,
-            'quan' => $quan,
-            'phuong' => $phuong,
-            'duong' => $duong
-        ], $sdt, $cccd, $email, $chucvu, $hashed_pass);
-
-        header("Location: dangnhap.php");
+    if (
+        empty($cccdError) && empty($chucvuError) && empty($hotenError) && empty($gioitinhError)
+        && empty($emailError) && empty($ngaysinhError) && empty($sdtError) && empty($diachiError) && empty($thanhphoError)
+        && empty($quanError) && empty($phuongError) && empty($duongError)
+    ) {
+        BuuCuc::updateNhanVien(
+            $pdo,
+            $idBC, // idBC
+            $idNV, // idNV
+            $hoten, // hoTen
+            $gioitinh, // gioiTinh
+            $ngaysinh, // ngaySinh
+            [
+                'diaChi' => $diachi,
+                'thanhPho' => $thanhpho,
+                'quan' => $quan,
+                'phuong' => $phuong,
+                'duong' => $duong
+            ], // diaChi
+            $sdt, // SDT
+            $cccd, // CCCD
+            $email, // email
+            $chucvu // chucVu
+        );
+        header("Location: qlnv.php");
         exit;
     }
 }
@@ -223,7 +234,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <div class="col-lg-12">
                                 <!-- Section Tittle -->
                                 <div class="section-tittle mb-50 text-center">
-                                    <h2>Thêm nhân viên</h2>
+                                    <h2>Sửa nhân viên</h2>
                                 </div>
                             </div>
                         </div>
@@ -304,10 +315,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <div class="col-lg-6 col-md-6">
                                     <div class="input-form">
                                         <label class="form-label my-1" style="font-size: 16px;">Ngày Sinh:</label>
-                                        <input type="date" id="ngaysinh" name="ngaysinh" value="<?= $ngaysinh ?>" placeholder="Ngày sinh">
+                                        <input type="date" id="ngaysinh" name="ngaysinh" value="<?= $ngaysinhFormatted ?>" placeholder="Ngày sinh">
                                         <span class="text-danger"><?= $ngaysinhError ?></span>
                                     </div>
                                 </div>
+
                                 <div class="col-lg-12">
                                     <div class="input-form">
                                         <label class="form-label my-1" style="font-size: 16px;">Số điện thoại:</label>
@@ -330,20 +342,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     </div>
                                 </div>
 
-                                <div class="col-lg-6 col-md-6">
-                                    <div class="select-items">
-                                        <label class="form-label my-1" style="font-size: 16px; display: block;">Bưu cục:</label>
-                                        <select id="buucuc" name="buucuc" size="5">
-                                            <option value="" selected>Chọn bưu cục</option>
-                                            <?php foreach ($buuCucs as $buuCuc) : ?>
-                                                <option value="<?= $buuCuc['idBC'] ?>" <?= $buuCuc['idBC'] === $buucuc ? 'selected' : '' ?> ><?= $buuCuc['tenBC'] ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                        <span class="text-danger"><?= $buucucError ?></span>
-                                    </div>
-                                </div>
+                                <!-- vị trí chọn BuuCuc -->
 
-                                <div class="col-lg-6 col-md-6">
+
+                                <div class="col-lg-12 col-md-12">
                                     <div class="select-items">
                                         <label class="form-label my-1" style="font-size: 16px; display: block;">Chức vụ:</label>
                                         <select name="chucvu" id="chucvu" class="form-select">
@@ -356,24 +358,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         <span class="text-danger"><?= $chucvuError ?></span>
                                     </div>
                                 </div>
-                                <div class="col-lg-12">
-                                    <div class="input-form">
-                                        <label class="form-label my-1" style="font-size: 16px;">Mật khẩu:</label>
-                                        <input type="password" id="pass" name="pass" value="<?= $pass ?>" placeholder="Mật khẩu">
-                                        <span class="text-danger"><?= $passError ?></span>
-                                    </div>
-                                </div>
-                                <div class="col-lg-12">
-                                    <div class="input-form">
-                                        <label class="form-label my-1" style="font-size: 16px;">Nhập lại mật khẩu:</label>
-                                        <input type="password" id="passcf" name="passcf" value="<?= $passcf ?>" placeholder="Nhập lại mật khẩu">
-                                        <span class="text-danger"><?= $passcfError ?></span>
-                                    </div>
-                                </div>
 
                                 <!-- Button -->
                                 <div class="col-lg-12">
-                                    <button name="submit" class="submit-btn">Thêm nhân viên</button>
+                                    <button name="submit" class="submit-btn">Sửa nhân viên</button>
+                                </div>
+                                <div class="col-lg-12">
+                                    <a class="my-2 btn bg-primary" href="doimknv.php?id=<?= $idNV ?>">Đổi mật khẩu</a>
                                 </div>
                             </div>
                         </form>
