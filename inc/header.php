@@ -115,7 +115,7 @@
                                                         </li>
                                                     <?php endif; ?>
 
-                                                    <?php if ($_SESSION['logged_role']==0) : ?>
+                                                    <?php if ($_SESSION['logged_role']=="0") : ?>
                                                         <li><a href="index.php">Trang chủ</a></li>
                                                         <li><a href="taodon.php">Tạo đơn</a></li>
                                                         <li><a href="#"><?= $_SESSION['logged_name']  ?></a>
