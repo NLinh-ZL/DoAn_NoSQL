@@ -472,7 +472,7 @@ ob_end_flush();
                                                             Nhận hàng
                                                         </button>
                                                     </a>
-                                                    <a href="QuanLyDon_NhanVien.php?action=huyhang&active=LayThanhCong&idVD=<?= $order['idVD'] ?>">
+                                                    <a href="QuanLyDon_NhanVien.php?page=<?= $page  ?>&action=huyhang&active=LayThanhCong&idVD=<?= $order['idVD'] ?>">
                                                         <button class="btn btn-danger ">
                                                             Hủy hàng
 

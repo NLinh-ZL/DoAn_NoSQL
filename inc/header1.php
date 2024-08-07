@@ -161,7 +161,7 @@ $kh = KhachHang::getUserById($pdo, $_SESSION['logged_id']);
                                         </li>
                                     <?php else : ?>
                                         <?php $chucvu = $_SESSION['logged_chucvu'];
-                                        if ($chucvu === 'Nhân viên') : ?>
+                                        if ($chucvu === 'Nhân viên' || $chucvu === 'Quản lý' ) : ?>
                                             <li>
                                                 <a href="QuanLyDon_NhanVien.php">
                                                     <span class="sub-item">Quản lý Đơn Nhân viên</span>

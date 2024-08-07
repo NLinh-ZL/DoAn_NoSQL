@@ -83,7 +83,17 @@
                                                         </li>
                                                     <?php endif; ?>
 
-                                                    <?php if ($_SESSION['logged_role'] == 1 && $_SESSION['logged_chucvu'] == "Nhân viên" || $_SESSION['logged_chucvu'] == "Shipper") : ?>
+                                                    <?php if ($_SESSION['logged_role'] == 1 && $_SESSION['logged_chucvu'] == "Nhân viên") : ?>
+                                                        <li><a href="index.php">Trang chủ</a></li>
+                                                        <li><a href="QuanLyDon.php">Quản lý Đơn</a></li>
+                                                        <li><a href="#"><?= $_SESSION['logged_name']  ?></a>
+                                                            <ul class="submenu">
+                                                                <li><a href="dangxuat.php">Đăng xuất</a></li>
+                                                            </ul>
+                                                        </li>
+                                                    <?php endif; ?>
+
+                                                    <?php if ($_SESSION['logged_role'] == 1 && $_SESSION['logged_chucvu'] == "Shipper" ) : ?>
                                                         <li><a href="index.php">Trang chủ</a></li>
                                                         <li><a href="QuanLyDon.php">Quản lý Đơn</a></li>
                                                         <li><a href="#"><?= $_SESSION['logged_name']  ?></a>
