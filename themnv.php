@@ -197,7 +197,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             'duong' => $duong
         ], $sdt, $cccd, $email, $chucvu, $hashed_pass);
 
-        header("Location: dangnhap.php");
+        header("Location: quanlynv.php");
         exit;
     }
 }

@@ -31,7 +31,6 @@
     require_once "class/Database.php";
     $db = new Database();
     $pdo = $db->getConnect();
-
     ?>
 
     <!--? Preloader Start -->
@@ -84,7 +83,7 @@
                                                         </li>
                                                     <?php endif; ?>
 
-                                                    <?php if ($_SESSION['logged_role'] == 1 && $_SESSION['logged_chucvu'] == "Nhân viên") : ?>
+                                                    <?php if ($_SESSION['logged_role'] == 1 && $_SESSION['logged_chucvu'] == "Nhân viên" || $_SESSION['logged_chucvu'] == "Shipper") : ?>
                                                         <li><a href="index.php">Trang chủ</a></li>
                                                         <li><a href="QuanLyDon.php">Quản lý Đơn</a></li>
                                                         <li><a href="#"><?= $_SESSION['logged_name']  ?></a>
