@@ -189,7 +189,7 @@ $customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHan
 
                                         Hủy Giao
                                     </h5>
-                                    <h6 style="color: #000;"><?= ($customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHang, 'tinhTrang' => 'Hủy giao'])) ?> đơn hàng</h6>
+                                    <h6 style="color: #000;"><?= ($customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHang, 'tinhTrang' => 'Giao hàng thất bại'])) ?> đơn hàng</h6>
                                 </a>
                             </li>
 
@@ -386,7 +386,7 @@ $customerOrdersCount = $collection->countDocuments(['idKhachHang' => $idKhachHan
                                         <?php
                                         $STT = 1;
                                         $offset = ($page - 1) * $limit;
-                                        $HuyGiao = VanDon::getAllpage($pdo, $limit, $offset, 'Hủy giao', $idKhachHang);
+                                        $HuyGiao = VanDon::getAllpage($pdo, $limit, $offset, 'Giao hàng thất bại', $idKhachHang);
                                         foreach ($HuyGiao as $order) :
                                             $tongKhoiLuong = 0;
                                             foreach ($order['hangHoa'] as $hang) {
