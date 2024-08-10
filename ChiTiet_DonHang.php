@@ -244,13 +244,6 @@ ob_end_flush();
                                         <div class="col-6" style="font-size: 18px; font-weight:600;"><?= $vanDon['ngayTao']->toDateTime()->format('Y-m-d H:i:s') ?></div>
                                     </div>
                                     <hr>
-                                    <?php if ($vanDon['tinhTrang'] !== 'Giao hàng thất bại') : ?>
-                                        <div class="row no-gutters">
-                                            <div class="col-6" style="font-size: 20px; font-weight:700;">Ngày Nhận:</div>
-                                            <div class="col-6" style="font-size: 18px; font-weight:600;"><?= $vanDon['ngayNhan']->toDateTime()->format('Y-m-d H:i:s') ?></div>
-                                        </div>
-                                        <hr>
-                                    <?php endif; ?>
 
 
                                     <div class="row no-gutters">

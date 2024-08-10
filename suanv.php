@@ -8,8 +8,7 @@ require_once "class/BuuCuc.php";
 
 $idNV = isset($_GET['id']) ? (int) trim($_GET['id']) : null;
 
-$nhanVien = BuuCuc::getNhanVienById($pdo, $idNV);
-
+$nhanVien = BuuCuc::getNhanVienById1($pdo, $idNV);
 if ($nhanVien) {
     // Điền thông tin vào các biến để sử dụng trong form
     $hoten = $nhanVien['hoTen'];
@@ -26,6 +25,7 @@ if ($nhanVien) {
     $chucvu = $nhanVien['chucVu'];
     // $buucuc = $nhanVien['idBC'];
 }
+
 
 // Tìm vị trí của "Tân Hòa Đông" trong chuỗi địa chỉ
 $pos = strpos($diachi, $duong);
@@ -208,7 +208,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $email, // email
             $chucvu // chucVu
         );
-        header("Location: qlnv.php");
+        header("Location: quanlynv.php");
         exit;
     }
 }

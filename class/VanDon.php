@@ -297,6 +297,7 @@ class VanDon
                     'loaiHang' => 1,
                     'tinhTrang' => 1,
                     'quyTrinhVC' => 1,
+                    'tienCuoc' => 1,
                     'ngayTao' => 1,
                     'hangHoa.trongLuong' => 1,
                     'lastStatus' => [

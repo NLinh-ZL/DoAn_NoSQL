@@ -5,13 +5,13 @@ require_once "inc/header.php";
 <?php
 require_once "class/BuuCuc.php";
 $idNV = isset($_GET['id']) ? (int) trim($_GET['id']) : null;
-$nhanVien = BuuCuc::getNhanVienById($pdo, $idNV);
-$hoten = $nhanVien['hoTen'];
 
+$nhanVien = BuuCuc::getNhanVienById1($pdo, $idNV);
+$hoten = $nhanVien['hoTen'];
 if (isset($_POST['confirm']) && $_POST['confirm'] == 'yes') {
     $idBC=BuuCuc::getIdBuuCucByNhanVienId($pdo, $idNV);
     BuuCuc::deleteNhanVien($pdo, $idBC, $idNV);
-    
+    header("Location: quanlynv.php");
 }
 ?>
 

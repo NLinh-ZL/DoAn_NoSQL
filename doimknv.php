@@ -89,7 +89,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <div class="col-lg-12">
                                 <!-- Section Tittle -->
                                 <div class="section-tittle mb-50 text-center">
-                                    <h2>Sửa nhân viên</h2>
+                                    <h2>Đổi mật khẩu nhân viên</h2>
                                 </div>
                             </div>
                         </div>

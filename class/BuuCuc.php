@@ -301,37 +301,26 @@ class BuuCuc
     }
 
 
-    public static function getNhanVienById($pdo, $idNV)
-    {
+    public static function getNhanVienById1($pdo,$idNV) {
+        // Kết nối đến MongoDB
+        
         $collection = $pdo->BuuCuc;
     
-        $query = [
-            'nhanVien.idNV' => (int)$idNV
-        ];
-    
-        $pipeline = [
+        // Tìm nhân viên theo idNV
+        $result = $collection->aggregate([
             ['$unwind' => '$nhanVien'],
-            ['$match' => $query],
-            ['$project' => [
-                '_id' => 0,
-                'idBC' => 1,
-                'tenBC' => 1,
-                'diaChi' => 1,
-                'nhanVien' => 1
-            ]]
-        ];
+            ['$match' => ['nhanVien.idNV' => $idNV]],
+            ['$replaceRoot' => ['newRoot' => '$nhanVien']],
+        ]);
     
-        $cursor = $collection->aggregate($pipeline);
-        $result = $cursor->toArray();
-    
-        // Kiểm tra nếu tìm thấy nhân viên
-        if (count($result) > 0) {
-            $result[0]['nhanVien']['idBC'] = $result[0]['idBC'];
-            $result[0]['nhanVien']['tenBC'] = $result[0]['tenBC'];
-            $result[0]['nhanVien']['diaChi'] = $result[0]['diaChi'];
-            return $result[0]['nhanVien'];
+        // Chuyển kết quả thành mảng
+        $nhanVien = $result->toArray();
+        
+        // Kiểm tra và trả về kết quả nếu tìm thấy nhân viên
+        if (count($nhanVien) > 0) {
+            return $nhanVien[0];
         } else {
-            return null; // Không tìm thấy nhân viên
+            return null;
         }
     }
     
@@ -476,6 +465,40 @@ class BuuCuc
             echo "Cập nhật thành công!";
         } else {
             echo "Không có thay đổi nào được thực hiện hoặc bưu cục hoặc nhân viên không tồn tại.";
+        }
+    }
+
+    public static function getNhanVienById($pdo, $idNV)
+    {
+        $collection = $pdo->BuuCuc;
+    
+        $query = [
+            'nhanVien.idNV' => (int)$idNV
+        ];
+    
+        $pipeline = [
+            ['$unwind' => '$nhanVien'],
+            ['$match' => $query],
+            ['$project' => [
+                '_id' => 0,
+                'idBC' => 1,
+                'tenBC' => 1,
+                'diaChi' => 1,
+                'nhanVien' => 1
+            ]]
+        ];
+    
+        $cursor = $collection->aggregate($pipeline);
+        $result = $cursor->toArray();
+    
+        // Kiểm tra nếu tìm thấy nhân viên
+        if (count($result) > 0) {
+            $result[0]['nhanVien']['idBC'] = $result[0]['idBC'];
+            $result[0]['nhanVien']['tenBC'] = $result[0]['tenBC'];
+            $result[0]['nhanVien']['diaChi'] = $result[0]['diaChi'];
+            return $result[0]['nhanVien'];
+        } else {
+            return null; // Không tìm thấy nhân viên
         }
     }
 }

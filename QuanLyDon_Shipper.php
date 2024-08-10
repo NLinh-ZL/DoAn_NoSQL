@@ -14,7 +14,6 @@ $NhanVienDangNhap = BuuCuc::getNhanVienById($pdo,  isset($_SESSION['logged_id'])
 // $db = new Database();
 // $database = $db->getConnect();
 $collection = $pdo->VanDon; // Chọn bộ sưu tập 'VanDon'
-
 // $idKhachHang = isset($_SESSION['logged_iduser']) ? $_SESSION['logged_iduser']: 0;
 if (isset($_SESSION['logged_id'])) {
     $idKhachHang = $_SESSION['logged_id'];
@@ -252,7 +251,6 @@ ob_end_flush();
                                         // $STT = 1;
                                         $offset = ($page - 1) * $limit;
 
-
                                         $ChoXacNhan = VanDon::getDonHang_Shipper($pdo, $NhanVienDangNhap['idBC'], $NhanVienDangNhap['idNV'], $limit, $offset, 'Đang lấy');
                                         foreach ($ChoXacNhan as $order) :
                                             $tongKhoiLuong = 0;
@@ -329,7 +327,7 @@ ob_end_flush();
                                         <?php
                                         $STT = 1;
                                         $offset = ($page - 1) * $limit;
-                                        $Huygiao = VanDon::getDonHang_Shipper($pdo, $NhanVienDangNhap['idBC'], $NhanVienDangNhap['idNV'], $limit, $offset, 'Hủy giao hàng');
+                                        $Huygiao = VanDon::getDonHang_Shipper($pdo, $NhanVienDangNhap['idBC'], $NhanVienDangNhap['idNV'], $limit, $offset, 'Đang giao');
 
 
                                         foreach ($Huygiao as $order) :

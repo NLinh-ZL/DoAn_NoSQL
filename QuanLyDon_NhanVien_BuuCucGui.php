@@ -416,7 +416,7 @@ ob_end_flush();
 
                                             <th scope="col">Ngày tạo</th>
                                             <th scope="col">Tên người nhận</th>
-                                            <th scope="col">Ngày nhận</th>
+                                            <th scope="col">Tiền cước</th>
                                             <th scope="col">Loại hàng</th>
                                             <th scope="col">Khối lượng</th>
                                             <th scope="col">Xem chi tiết</th>
@@ -439,7 +439,7 @@ ob_end_flush();
 
                                                 <td><?= $order['ngayTao']->toDateTime()->format('Y-m-d H:i:s') ?></td>
                                                 <td><?= $order['nguoiNhan']['hoTen'] ?></td>
-                                                <td><?= $order['thoiGianHenGiao'] ?></td>
+                                                <td><?= number_format($order['tienCuoc'], 0, ',', '.') ?>vnđ</td>
                                                 <td><?= $order['loaiHang'] ?></td>
                                                 <td><?= $tongKhoiLuong ?> kg</td>
 

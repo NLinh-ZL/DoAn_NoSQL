@@ -19,7 +19,6 @@ $sortOrder = isset($_GET['sortOrder']) ? $_GET['sortOrder'] : 'asc';
 
 // Lấy danh sách nhân viên
 $danhSachNhanVien = BuuCuc::getNhanVienList($pdo, $page, $limit, $search, $sortColumn, $sortOrder);
-
 // Tính tổng số trang
 $totalPages = BuuCuc::getTotalPages($pdo, $limit, $search);
 echo $totalPages;
@@ -163,7 +162,7 @@ echo $totalPages;
                                                         <?php if ($idus === $item->idNV || $item->chucVu === "Quản lý") : ?>
                                                             <button class="btn btn-secondary btn-disabled" disabled>Xóa</button>
                                                         <?php else : ?>
-                                                            <a class="btn bg-danger" href="xoanv.php?id=<?= htmlspecialchars($item->idNV) ?>">Xóa</a>
+                                                            <a class="btn bg-danger" href="xoanv.php?id=<?= $item->idNV ?>">Xóa</a>
                                                         <?php endif; ?>
                                                     </td>
                                                 </tr>
